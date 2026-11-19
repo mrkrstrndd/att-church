@@ -109,8 +109,12 @@ public class MemberService
         return ToQrCodeDto(member);
     }
 
-    public async Task<MemberDto> CreateAsync(CreateMemberRequest request, CancellationToken ct = default)
+    public async Task<MemberDto> CreateAsync(
+        CreateMemberRequest request, ActorContext actor, CancellationToken ct = default)
     {
+        if (request.CreateLogin is not null && !actor.IsAdmin)
+            throw new ForbiddenException("Only administrators can create member login accounts.");
+
         var email = NormalizeEmail(request.Email);
         if (await _db.Members.AnyAsync(m => m.Email == email, ct))
             throw new ConflictException("A member with that email already exists.");
@@ -118,6 +122,8 @@ public class MemberService
         var roleNames = NormalizeRoles(request.Roles);
         if (roleNames.Count == 0)
             roleNames = new[] { RoleNames.Member };
+
+        EnsureVipRules(roleNames, request.CellId);
 
         var roles = await LoadRolesAsync(roleNames, ct);
         var cell = await GetAssignableCellAsync(request.CellId, ct);
@@ -173,6 +179,8 @@ public class MemberService
         var roleNames = NormalizeRoles(request.Roles);
         if (roleNames.Count == 0)
             throw new AppValidationException(nameof(request.Roles), "Select at least one role.");
+
+        EnsureVipRules(roleNames, request.CellId);
 
         var isLeader = await _db.Cells.AnyAsync(c => c.IsActive && c.LeaderMemberId == member.Id, ct);
         if (isLeader && !roleNames.Contains(RoleNames.CellLeader, StringComparer.OrdinalIgnoreCase))
@@ -255,6 +263,17 @@ public class MemberService
         }
 
         throw new ConflictException("Could not generate a unique member QR code. Please try again.");
+    }
+
+    private static void EnsureVipRules(IReadOnlyCollection<string> roles, Guid? cellId)
+    {
+        if (!roles.Contains(RoleNames.Vip, StringComparer.OrdinalIgnoreCase))
+            return;
+
+        if (roles.Count > 1)
+            throw new AppValidationException("roles", "A VIP cannot have any other roles.");
+        if (cellId is not null)
+            throw new AppValidationException("cellId", "A VIP cannot be assigned to a cell.");
     }
 
     private async Task<Cell?> GetAssignableCellAsync(Guid? cellId, CancellationToken ct)

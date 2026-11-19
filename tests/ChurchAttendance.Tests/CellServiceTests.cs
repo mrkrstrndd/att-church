@@ -39,4 +39,24 @@ public class CellServiceTests
         Assert.Single(created.Members);
         Assert.True(created.Members[0].IsLeader);
     }
+
+    [Fact]
+    public async Task AddMembersAsync_RejectsVipMembers()
+    {
+        await using var db = TestDb.Create();
+        var leader = TestDb.Member("leader@example.com", "Liza", "Leader");
+        var vip = TestDb.Member("vip@example.com", "Victor", "Visitor");
+        db.Members.AddRange(leader, vip);
+        db.MemberRoles.Add(new MemberRole { MemberId = leader.Id, RoleId = TestDb.Role(db, RoleNames.CellLeader).Id });
+        db.MemberRoles.Add(new MemberRole { MemberId = vip.Id, RoleId = TestDb.Role(db, RoleNames.Vip).Id });
+        await db.SaveChangesAsync();
+
+        var service = new CellService(db, new FixedChurchClock(new DateOnly(2026, 11, 4)));
+        var cell = await service.CreateAsync(new CreateCellRequest("North Cell", null, leader.Id));
+
+        var exception = await Assert.ThrowsAsync<ConflictException>(() =>
+            service.AddMembersAsync(cell.Id, new AddCellMembersRequest(new[] { vip.Id })));
+
+        Assert.Contains("VIP", exception.Message);
+    }
 }

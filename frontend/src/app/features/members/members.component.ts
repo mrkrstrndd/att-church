@@ -68,7 +68,7 @@ export class MembersComponent implements OnInit {
   readonly cellControl = this.fb.nonNullable.control('');
 
   readonly displayedColumns = ['member', 'contact', 'roles', 'cell', 'login', 'actions'];
-  readonly roleOptions: Role[] = ['Member', 'CellLeader', 'Admin'];
+  readonly roleOptions: Role[] = ['Member', 'VIP', 'CellLeader', 'Admin'];
 
   constructor() {
     this.searchControl.valueChanges

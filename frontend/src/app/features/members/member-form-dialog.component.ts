@@ -14,6 +14,7 @@ import { MemberService } from '../../core/services/member.service';
 import { Member, MemberPayload, MemberQrCode } from '../../core/models/member.model';
 import { CellListItem } from '../../core/models/cell.model';
 import { Role } from '../../core/models/auth.model';
+import { AuthService } from '../../core/services/auth.service';
 import { apiErrorMessage } from '../../core/utils';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog.component';
 
@@ -44,6 +45,7 @@ export class MemberFormDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly members = inject(MemberService);
   private readonly dialog = inject(MatDialog);
+  readonly auth = inject(AuthService);
   private readonly ref = inject(MatDialogRef<MemberFormDialogComponent, Member>);
   readonly data = inject<MemberDialogData>(MAT_DIALOG_DATA);
 
@@ -73,6 +75,7 @@ export class MemberFormDialogComponent {
     cellId: [this.data.member?.cellId ?? ''],
     roles: this.fb.nonNullable.group({
       Member: [this.data.member ? this.data.member.roles.includes('Member') : true],
+      VIP: [this.data.member?.roles.includes('VIP') ?? false],
       CellLeader: [this.data.member?.roles.includes('CellLeader') ?? false],
       Admin: [this.data.member?.roles.includes('Admin') ?? false]
     }),
@@ -87,6 +90,9 @@ export class MemberFormDialogComponent {
     if (values.Member) {
       result.push('Member');
     }
+    if (values.VIP) {
+      result.push('VIP');
+    }
     if (values.CellLeader) {
       result.push('CellLeader');
     }
@@ -97,7 +103,28 @@ export class MemberFormDialogComponent {
   }
 
   get wantsLogin(): boolean {
-    return !this.isEdit && this.form.controls.createLogin.value;
+    return this.auth.isAdmin() && !this.isEdit && this.form.controls.createLogin.value;
+  }
+
+  onRoleChanged(role: Role, checked: boolean): void {
+    const roles = this.form.controls.roles;
+    if (role === 'VIP' && checked) {
+      roles.patchValue({ Member: false, VIP: true, CellLeader: false, Admin: false });
+      this.form.controls.cellId.setValue('');
+      return;
+    }
+
+    if (role !== 'VIP' && checked && roles.controls.VIP.value) {
+      roles.controls.VIP.setValue(false);
+    }
+  }
+
+  onCellChanged(cellId: string): void {
+    if (!cellId || !this.form.controls.roles.controls.VIP.value) {
+      return;
+    }
+
+    this.form.controls.roles.patchValue({ VIP: false, Member: true });
   }
 
   togglePassword(): void {

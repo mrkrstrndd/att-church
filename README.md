@@ -9,7 +9,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 ## Features
 
 - **JWT authentication** with 15-minute access tokens, rotating hashed refresh tokens, "Remember me" (30 days), account lockout after five failed attempts, and forced first-login password change.
-- **Members** with multiple roles (`Member`, `CellLeader`, `Admin`), optional cell assignment, soft deletion, filtered/paged directory, and optional login-account creation.
+- **Members** with multiple roles (`Member`, `VIP`, `CellLeader`, `Admin`), optional cell assignment, soft deletion, filtered/paged directory, and optional login-account creation. Creating login accounts is restricted to Admins.
 - **Cells** with exactly one validated `CellLeader`, no member cap, leader/member detail views, add/remove members, and soft deletion.
 - **Events** with a single-day/multi-day toggle, server-generated `event_days`, and protected date edits when attendance already exists.
 - **Attendance check-in** for Admins and Cell Leaders, with idempotent check-ins, per-day tabs, search, live counts, and undo.
@@ -108,7 +108,7 @@ dotnet restore ChurchAttendance.sln
 dotnet run --project src/ChurchAttendance.Api
 ```
 
-The API starts at <http://localhost:5180>, applies EF Core migrations automatically, seeds the three roles, and creates the default admin on an empty database.
+The API starts at <http://localhost:5180>, applies EF Core migrations automatically, seeds the four roles, and creates the default admin on an empty database.
 
 Swagger: <http://localhost:5180/swagger>
 
@@ -228,6 +228,8 @@ Implementation details:
 The specification left several decisions open. This implementation uses:
 
 - **Cell leader validation:** assigning a leader without the `CellLeader` role is rejected with `400`; the role is **not** auto-granted.
+- **VIP role:** VIP is mutually exclusive with Member, CellLeader, and Admin, and a VIP cannot be assigned to a cell. In the member form, choosing VIP clears other roles and the cell; choosing a cell switches the member to Member. VIP members cannot be added to a cell until their role is changed.
+- **Login creation:** only Admins can create member login accounts. The API enforces this independently of the UI.
 - **Cell membership:** one cell per member. Adding a member who already belongs to another cell is rejected.
 - **Leader membership:** when a leader has no cell, creating/updating a cell adds them to it as a member. A leader may also be a member elsewhere.
 - **Attendance:** manual check-in or QR scan by Admins and Cell Leaders. A Cell Leader can only see/check in members of the cell they lead.
@@ -257,7 +259,7 @@ The specification left several decisions open. This implementation uses:
 dotnet test ChurchAttendance.sln
 ```
 
-Covered: forced password change, login, member creation, QR generation/scan/rotation, event/day generation, attendance check-in, dashboard KPIs/monthly endpoint, event date protection, cell leader validation, login lockout, refresh rotation/reuse, and BCrypt verification.
+Covered: forced password change, login, member creation, Admin-only login creation, VIP exclusivity and cell restrictions, QR generation/scan/rotation, event/day generation, attendance check-in, dashboard KPIs/monthly endpoint, event date protection, cell leader validation, login lockout, refresh rotation/reuse, and BCrypt verification.
 
 ### Frontend
 
@@ -278,9 +280,9 @@ Covered: token storage for Remember me, refresh rotation, login form validation,
 |---|---|
 | ![Members](docs/screenshots/members.png) | ![Cells](docs/screenshots/cells.png) |
 
-| Member QR pass |
-|---|
-| ![Member QR pass](docs/screenshots/member-qr.png) |
+| Member QR pass | VIP role form |
+|---|---|
+| ![Member QR pass](docs/screenshots/member-qr.png) | ![VIP role](docs/screenshots/vip-role.png) |
 
 ## Notes on the reference specification
 

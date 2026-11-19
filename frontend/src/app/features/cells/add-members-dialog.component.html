@@ -14,6 +14,10 @@
     <input matInput [formControl]="search" placeholder="Name, email, or phone" />
   </mat-form-field>
 
+  <p class="vip-hint">
+    VIP attendees are not shown. Change their role to Member before adding them to a cell.
+  </p>
+
   <mat-progress-bar mode="indeterminate" [class.is-hidden]="!loading()" class="loading" />
 
   <div class="member-list">

@@ -131,6 +131,27 @@ public class EndToEndFlowTests : IClassFixture<ApiFactory>
         var member = await memberResponse.Content.ReadFromJsonAsync<MemberDto>();
         Assert.NotNull(member);
 
+        var vipResponse = await client.PostAsJsonAsync("/api/members", new
+        {
+            lastName = "Visitor",
+            firstName = "Violet",
+            email = "vip.integration@example.com",
+            roles = new[] { "VIP" }
+        });
+        Assert.Equal(HttpStatusCode.Created, vipResponse.StatusCode);
+        var vip = await vipResponse.Content.ReadFromJsonAsync<MemberDto>();
+        Assert.NotNull(vip);
+        Assert.Contains("VIP", vip!.Roles);
+
+        var invalidVipResponse = await client.PostAsJsonAsync("/api/members", new
+        {
+            lastName = "Invalid",
+            firstName = "Vip",
+            email = "vip.invalid@example.com",
+            roles = new[] { "VIP", "Member" }
+        });
+        Assert.Equal(HttpStatusCode.BadRequest, invalidVipResponse.StatusCode);
+
         var qrResponse = await client.GetAsync($"/api/members/{member!.Id}/qr-code");
         Assert.Equal(HttpStatusCode.OK, qrResponse.StatusCode);
         var qrCode = await qrResponse.Content.ReadFromJsonAsync<MemberQrCodeDto>();
@@ -188,7 +209,7 @@ public class EndToEndFlowTests : IClassFixture<ApiFactory>
 
         var kpis = await client.GetFromJsonAsync<DashboardKpisDto>("/api/dashboard/kpis");
         Assert.NotNull(kpis);
-        Assert.Equal(2, kpis!.TotalActiveMembers);
+        Assert.Equal(3, kpis!.TotalActiveMembers);
         Assert.Equal(1, kpis.LastEvent?.Attendance);
         Assert.True(kpis.AverageAttendance > 0);
 

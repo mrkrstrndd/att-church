@@ -16,7 +16,8 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.HasData(
             new Role { Id = 1, Name = RoleNames.Member },
             new Role { Id = 2, Name = RoleNames.CellLeader },
-            new Role { Id = 3, Name = RoleNames.Admin });
+            new Role { Id = 3, Name = RoleNames.Admin },
+            new Role { Id = 4, Name = RoleNames.Vip });
     }
 }
 

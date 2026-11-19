@@ -39,13 +39,23 @@ public class CreateMemberRequestValidator : AbstractValidator<CreateMemberReques
             .WithMessage("Select at least one role.");
         RuleForEach(x => x.Roles)
             .Must(r => RoleNames.All.Contains(r, StringComparer.OrdinalIgnoreCase))
-            .WithMessage("Role must be Member, CellLeader, or Admin.");
+            .WithMessage("Role must be Member, VIP, CellLeader, or Admin.");
+        RuleFor(x => x.Roles)
+            .Must(r => !HasVip(r) || r!.Distinct(StringComparer.OrdinalIgnoreCase).Count() == 1)
+            .WithMessage("A VIP cannot have any other roles.");
+        RuleFor(x => x.CellId)
+            .Null()
+            .When(x => HasVip(x.Roles))
+            .WithMessage("A VIP cannot be assigned to a cell.");
 
         When(x => x.CreateLogin is not null, () =>
         {
             RuleFor(x => x.CreateLogin!).SetValidator(new CreateLoginRequestValidator());
         });
     }
+
+    private static bool HasVip(IReadOnlyList<string>? roles) =>
+        roles?.Any(role => string.Equals(role, RoleNames.Vip, StringComparison.OrdinalIgnoreCase)) ?? false;
 }
 
 public class UpdateMemberRequestValidator : AbstractValidator<UpdateMemberRequest>
@@ -66,6 +76,16 @@ public class UpdateMemberRequestValidator : AbstractValidator<UpdateMemberReques
             .WithMessage("Select at least one role.");
         RuleForEach(x => x.Roles)
             .Must(r => RoleNames.All.Contains(r, StringComparer.OrdinalIgnoreCase))
-            .WithMessage("Role must be Member, CellLeader, or Admin.");
+            .WithMessage("Role must be Member, VIP, CellLeader, or Admin.");
+        RuleFor(x => x.Roles)
+            .Must(r => !HasVip(r) || r!.Distinct(StringComparer.OrdinalIgnoreCase).Count() == 1)
+            .WithMessage("A VIP cannot have any other roles.");
+        RuleFor(x => x.CellId)
+            .Null()
+            .When(x => HasVip(x.Roles))
+            .WithMessage("A VIP cannot be assigned to a cell.");
     }
+
+    private static bool HasVip(IReadOnlyList<string>? roles) =>
+        roles?.Any(role => string.Equals(role, RoleNames.Vip, StringComparison.OrdinalIgnoreCase)) ?? false;
 }

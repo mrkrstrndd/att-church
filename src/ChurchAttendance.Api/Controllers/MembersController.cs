@@ -60,7 +60,7 @@ public class MembersController : ControllerBase
     [ProducesResponseType(typeof(MemberDto), StatusCodes.Status201Created)]
     public async Task<ActionResult<MemberDto>> Create(CreateMemberRequest request, CancellationToken ct)
     {
-        var created = await _members.CreateAsync(request, ct);
+        var created = await _members.CreateAsync(request, User.ToActor(), ct);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 

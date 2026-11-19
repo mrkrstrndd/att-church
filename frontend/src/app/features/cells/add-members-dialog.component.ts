@@ -72,7 +72,7 @@ export class AddMembersDialogComponent {
       })
       .subscribe({
         next: (result) => {
-          this.members.set(result.items);
+          this.members.set(result.items.filter((member) => !member.roles.includes('VIP')));
           this.loading.set(false);
         },
         error: (error: unknown) => {

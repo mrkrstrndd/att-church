@@ -45,7 +45,7 @@
 
     <mat-form-field appearance="outline">
       <mat-label>Cell</mat-label>
-      <mat-select formControlName="cellId">
+      <mat-select formControlName="cellId" (selectionChange)="onCellChanged($event.value)">
         <mat-option value="">No cell / unassigned</mat-option>
         @for (cell of data.cells; track cell.id) {
           <mat-option [value]="cell.id">{{ cell.name }}</mat-option>
@@ -55,17 +55,24 @@
 
     <div class="section span-2">
       <p class="section__label">Roles</p>
-      <p class="section__hint">A member may hold more than one role.</p>
+      <p class="section__hint">
+        A member can hold more than one role. VIP is exclusive and is used for attendees who are not
+        connected to a cell leader.
+      </p>
       <div class="role-grid" formGroupName="roles">
-        <mat-checkbox formControlName="Member">
+        <mat-checkbox formControlName="Member" (change)="onRoleChanged('Member', $event.checked)">
           <span class="role-name">Member</span>
           <small>General congregation member</small>
         </mat-checkbox>
-        <mat-checkbox formControlName="CellLeader">
+        <mat-checkbox formControlName="VIP" (change)="onRoleChanged('VIP', $event.checked)">
+          <span class="role-name">VIP</span>
+          <small>Attendee not connected to a cell leader</small>
+        </mat-checkbox>
+        <mat-checkbox formControlName="CellLeader" (change)="onRoleChanged('CellLeader', $event.checked)">
           <span class="role-name">CellLeader</span>
           <small>Can record attendance for their cell</small>
         </mat-checkbox>
-        <mat-checkbox formControlName="Admin">
+        <mat-checkbox formControlName="Admin" (change)="onRoleChanged('Admin', $event.checked)">
           <span class="role-name">Admin</span>
           <small>Full access to records and settings</small>
         </mat-checkbox>
@@ -136,7 +143,7 @@
       </div>
     }
 
-    @if (!isEdit) {
+    @if (!isEdit && auth.isAdmin()) {
       <div class="section span-2 login-section">
         <div class="login-section__head">
           <div>

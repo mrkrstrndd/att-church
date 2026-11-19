@@ -379,6 +379,11 @@ namespace ChurchAttendance.Infrastructure.Persistence.Migrations
                         {
                             Id = (short)3,
                             Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = (short)4,
+                            Name = "VIP"
                         });
                 });
 

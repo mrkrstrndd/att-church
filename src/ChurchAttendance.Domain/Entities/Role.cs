@@ -8,8 +8,9 @@ public static class RoleNames
     public const string Member = "Member";
     public const string CellLeader = "CellLeader";
     public const string Admin = "Admin";
+    public const string Vip = "VIP";
 
-    public static readonly IReadOnlyList<string> All = new[] { Member, CellLeader, Admin };
+    public static readonly IReadOnlyList<string> All = new[] { Member, Vip, CellLeader, Admin };
 }
 
 public class Role

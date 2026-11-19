@@ -124,11 +124,21 @@ public class CellService
             throw new AppValidationException(nameof(request.MemberIds), "Select at least one member.");
 
         var members = await _db.Members
+            .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
             .Where(m => ids.Contains(m.Id) && m.IsActive)
             .ToListAsync(ct);
 
         if (members.Count != ids.Count)
             throw new AppValidationException(nameof(request.MemberIds), "One or more selected members do not exist or are inactive.");
+
+        var vipMembers = members
+            .Where(m => m.MemberRoles.Any(mr =>
+                string.Equals(mr.Role.Name, RoleNames.Vip, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        if (vipMembers.Count > 0)
+            throw new ConflictException(
+                "VIP members must be changed to Member before joining a cell: " +
+                string.Join(", ", vipMembers.Select(m => m.FullName)) + ".");
 
         var inOtherCell = members.Where(m => m.CellId is not null && m.CellId != cellId).ToList();
         if (inOtherCell.Count > 0)

@@ -1,4 +1,4 @@
-export type Role = 'Member' | 'CellLeader' | 'Admin';
+export type Role = 'Member' | 'VIP' | 'CellLeader' | 'Admin';
 
 export interface UserProfile {
   id: string;
