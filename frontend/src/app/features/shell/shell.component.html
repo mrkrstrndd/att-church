@@ -1,0 +1,87 @@
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    class="sidebar"
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="sidenavOpened()"
+    [fixedInViewport]="isHandset()"
+    (closedStart)="sidenavOpened.set(false)"
+  >
+    <div class="brand">
+      <div class="brand__mark">
+        <mat-icon>church</mat-icon>
+      </div>
+      <div>
+        <p class="brand__name">Grace Community</p>
+        <p class="brand__sub">Attendance</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems(); track item.route) {
+        <a
+          mat-button
+          class="nav__item"
+          [routerLink]="item.route"
+          routerLinkActive="nav__item--active"
+          (click)="closeOnNavigate()"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar__footer">
+      <div class="sidebar__verse">
+        <p>“Let us not give up meeting together… but let us encourage one another.”</p>
+        <span>Hebrews 10:25</span>
+      </div>
+      <button mat-button class="nav__item nav__item--muted" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <mat-toolbar class="topbar">
+      <button mat-icon-button class="topbar__menu" (click)="toggleSidenav()" aria-label="Toggle navigation">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="topbar__spacer"></span>
+
+      <div class="topbar__page">
+        <span class="topbar__date">{{ today }}</span>
+      </div>
+
+      <button class="profile" [matMenuTriggerFor]="profileMenu" aria-label="Account menu">
+        <span class="avatar">{{ initials() }}</span>
+        <span class="profile__copy">
+          <strong>{{ auth.user()?.displayName }}</strong>
+          <small>{{ auth.user()?.roles?.join(' · ') }}</small>
+        </span>
+        <mat-icon>expand_more</mat-icon>
+      </button>
+
+      <mat-menu #profileMenu="matMenu">
+        <div class="menu-heading">
+          <strong>{{ auth.user()?.displayName }}</strong>
+          <span>{{ auth.user()?.email }}</span>
+        </div>
+        <mat-divider />
+        <a mat-menu-item routerLink="/change-password">
+          <mat-icon>lock_reset</mat-icon>
+          <span>Change password</span>
+        </a>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Sign out</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <main class="page">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

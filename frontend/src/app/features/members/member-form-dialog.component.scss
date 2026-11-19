@@ -1,0 +1,260 @@
+.dialog-content {
+  padding-top: 0.35rem !important;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  min-width: min(600px, 78vw);
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.section {
+  padding: 1rem;
+  border: 1px solid rgba(20, 43, 47, 0.08);
+  border-radius: 0.9rem;
+  background: rgba(247, 243, 234, 0.55);
+}
+
+.qr-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(31, 85, 84, 0.14);
+  border-radius: 0.9rem;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(198, 163, 102, 0.14), transparent 14rem),
+    rgba(31, 85, 84, 0.035);
+}
+
+.qr-panel__preview {
+  display: grid;
+  width: 9.5rem;
+  height: 9.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(20, 43, 47, 0.1);
+  border-radius: 0.8rem;
+  background: var(--church-paper);
+  place-items: center;
+}
+
+.qr-panel__preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.qr-panel__preview > mat-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  color: var(--church-gold-dark);
+  font-size: 3.5rem;
+}
+
+.qr-panel__copy {
+  min-width: 0;
+}
+
+.qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.qr-actions button {
+  font-size: 0.72rem;
+}
+
+.qr-actions mat-icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  font-size: 1.05rem;
+}
+
+.qr-actions__rotate {
+  color: #8e352a;
+}
+
+.qr-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin: 0.5rem 0 0;
+  color: var(--church-muted);
+  font-size: 0.66rem;
+  line-height: 1.45;
+}
+
+.qr-warning mat-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  font-size: 0.95rem;
+}
+
+.qr-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.6rem;
+  background: rgba(170, 63, 47, 0.07);
+  color: #8e352a;
+  font-size: 0.7rem;
+}
+
+.qr-error mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+.section__label {
+  margin: 0;
+  color: var(--church-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.section__hint {
+  margin: 0.2rem 0 0.8rem;
+  color: var(--church-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.role-grid mat-checkbox {
+  align-items: flex-start;
+  padding: 0.65rem;
+  border: 1px solid rgba(20, 43, 47, 0.07);
+  border-radius: 0.7rem;
+  background: #fffdf8;
+}
+
+.role-name {
+  display: block;
+  color: var(--church-ink);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.role-grid small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--church-muted);
+  font-size: 0.64rem;
+  line-height: 1.35;
+}
+
+.login-section__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.login-section__head .section__hint {
+  margin-bottom: 0;
+  max-width: 38ch;
+}
+
+.login-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed rgba(20, 43, 47, 0.12);
+}
+
+.password-hint {
+  grid-column: span 2;
+  margin: -0.35rem 0 0;
+  color: var(--church-muted);
+  font-size: 0.67rem;
+}
+
+.existing-login {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.7rem;
+  background: rgba(47, 122, 92, 0.08);
+  color: #2f7a5c;
+  font-size: 0.75rem;
+}
+
+.existing-login mat-icon {
+  font-size: 1.05rem;
+}
+
+.error-banner {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(170, 63, 47, 0.2);
+  border-radius: 0.7rem;
+  background: rgba(170, 63, 47, 0.07);
+  color: #8e352a;
+  font-size: 0.78rem;
+}
+
+.error-banner mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+mat-dialog-actions mat-spinner {
+  display: inline-block;
+  margin-right: 0.4rem;
+}
+
+@media (max-width: 680px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
+
+  .span-2 {
+    grid-column: span 1;
+  }
+
+  .qr-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-panel__preview {
+    justify-self: center;
+  }
+
+  .role-grid,
+  .login-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .password-hint {
+    grid-column: span 1;
+  }
+
+  .login-section__head {
+    flex-direction: column;
+  }
+}

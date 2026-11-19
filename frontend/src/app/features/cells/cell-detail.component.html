@@ -1,0 +1,128 @@
+<div class="back-row">
+  <a mat-button routerLink="/cells"><mat-icon>arrow_back</mat-icon>All cells</a>
+</div>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading-bar" />
+}
+
+@if (cell(); as current) {
+  <app-page-header
+    eyebrow="Cell community"
+    [title]="current.name"
+    [subtitle]="current.description || 'A small group gathering for fellowship and care.'"
+  >
+    @if (auth.isAdmin()) {
+      <button mat-stroked-button type="button" (click)="editCell()">
+        <mat-icon>edit</mat-icon>
+        Edit cell
+      </button>
+      <button mat-flat-button color="primary" type="button" (click)="addMembers()">
+        <mat-icon>person_add</mat-icon>
+        Add members
+      </button>
+      <button mat-icon-button type="button" class="danger" (click)="deleteCell()" aria-label="Deactivate cell">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+    }
+  </app-page-header>
+
+  <section class="cell-summary">
+    <article class="leader-card">
+      <div class="leader-card__avatar">{{ current.leaderName.charAt(0) }}</div>
+      <div class="leader-card__copy">
+        <p class="eyebrow">Cell leader</p>
+        <h2>{{ current.leaderName }}</h2>
+        <p>The shepherd who keeps this small group connected and cared for.</p>
+      </div>
+      <span class="leader-badge"><mat-icon>verified</mat-icon>Leader</span>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-card__icon"><mat-icon>groups</mat-icon></span>
+      <strong>{{ current.members.length }}</strong>
+      <span>Members</span>
+    </article>
+
+    <article class="stat-card">
+      <span class="stat-card__icon stat-card__icon--gold"><mat-icon>calendar_today</mat-icon></span>
+      <strong>{{ createdLabel() }}</strong>
+      <span>Created</span>
+    </article>
+  </section>
+
+  <section class="table-card">
+    <header class="table-head">
+      <div>
+        <h2>Members in this cell</h2>
+        <p>There is no maximum size — every person has a place.</p>
+      </div>
+    </header>
+
+    @if (current.members.length > 0) {
+      <div class="table-wrap">
+        <table mat-table [dataSource]="current.members" class="member-table">
+          <ng-container matColumnDef="member">
+            <th mat-header-cell *matHeaderCellDef>Member</th>
+            <td mat-cell *matCellDef="let member">
+              <div class="person">
+                <span class="avatar">{{ memberInitials(member) }}</span>
+                <div>
+                  <strong>{{ member.fullName }}</strong>
+                  <small>{{ member.email }}</small>
+                </div>
+                @if (member.isLeader) {
+                  <span class="mini-badge">Leader</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="contact">
+            <th mat-header-cell *matHeaderCellDef class="hide-sm">Phone</th>
+            <td mat-cell *matCellDef="let member" class="hide-sm">
+              <span class="muted">{{ member.phoneNo || '—' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef>Roles</th>
+            <td mat-cell *matCellDef="let member">
+              <div class="chips">
+                @for (role of member.roles; track role) {
+                  <span [class]="roleClass(role)">{{ role }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-col"></th>
+            <td mat-cell *matCellDef="let member" class="actions-col">
+              @if (auth.isAdmin() && !member.isLeader) {
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Remove from cell"
+                  class="danger"
+                  (click)="removeMember(member)"
+                >
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    } @else {
+      <app-empty-state
+        icon="group_add"
+        title="No members yet"
+        message="Add members to this cell to start caring for the people in this group."
+      />
+    }
+  </section>
+}

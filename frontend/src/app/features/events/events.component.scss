@@ -1,0 +1,144 @@
+:host {
+  display: block;
+}
+
+.loading-bar {
+  margin-bottom: 1rem;
+  border-radius: 999px;
+}
+
+.table-card {
+  overflow: hidden;
+  border: 1px solid rgba(20, 43, 47, 0.07);
+  border-radius: 1rem;
+  background: rgba(255, 253, 248, 0.9);
+  box-shadow: 0 14px 40px rgba(20, 43, 47, 0.05);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.event-table {
+  width: 100%;
+  min-width: 760px;
+  background: transparent;
+}
+
+th.mat-mdc-header-cell {
+  color: var(--church-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.event-name {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.35rem 0;
+}
+
+.event-mark {
+  display: grid;
+  flex: 0 0 2.4rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.7rem;
+  background: var(--church-ink);
+  color: #d8ba80;
+  place-items: center;
+}
+
+.event-mark mat-icon {
+  font-size: 1.15rem;
+}
+
+.event-name strong {
+  display: block;
+  color: var(--church-ink);
+  font-size: 0.85rem;
+}
+
+.event-name small {
+  display: block;
+  overflow: hidden;
+  max-width: 22rem;
+  color: var(--church-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date-label {
+  color: var(--church-ink);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.type-badge {
+  display: inline-flex;
+  padding: 0.18rem 0.48rem;
+  border-radius: 999px;
+  background: rgba(60, 101, 136, 0.1);
+  color: #3c6588;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.type-badge--multi {
+  background: rgba(181, 138, 74, 0.14);
+  color: #8f692f;
+}
+
+.attendance-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-cell strong {
+  color: var(--church-ink);
+  font-family: var(--church-display);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.attendance-cell small {
+  color: var(--church-muted);
+  font-size: 0.64rem;
+}
+
+.actions-col {
+  width: 15rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.checkin-btn {
+  height: 2.2rem;
+  margin-right: 0.3rem;
+  border-radius: 0.55rem;
+  font-size: 0.7rem;
+}
+
+.checkin-btn mat-icon {
+  width: 1rem;
+  height: 1rem;
+  font-size: 1rem;
+}
+
+.danger {
+  color: #a33d31;
+}
+
+@media (max-width: 900px) {
+  .hide-sm {
+    display: none;
+  }
+
+  .event-table {
+    min-width: 620px;
+  }
+}

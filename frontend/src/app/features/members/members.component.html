@@ -1,0 +1,146 @@
+<app-page-header
+  eyebrow="Directory"
+  title="Members"
+  subtitle="Every person in the church family, their roles, and the cell that cares for them."
+>
+  @if (auth.isAdmin()) {
+    <button mat-flat-button color="primary" type="button" (click)="addMember()">
+      <mat-icon>person_add</mat-icon>
+      Add member
+    </button>
+  }
+</app-page-header>
+
+<section class="filters">
+  <mat-form-field appearance="outline" class="filters__search">
+    <mat-label>Search members</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput [formControl]="searchControl" placeholder="Name, email, or phone" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filters__select">
+    <mat-label>Role</mat-label>
+    <mat-select [formControl]="roleControl">
+      <mat-option value="">All roles</mat-option>
+      @for (role of roleOptions; track role) {
+        <mat-option [value]="role">{{ role }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="filters__select">
+    <mat-label>Cell</mat-label>
+    <mat-select [formControl]="cellControl">
+      <mat-option value="">All cells</mat-option>
+      @for (cell of cells(); track cell.id) {
+        <mat-option [value]="cell.id">{{ cell.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <button mat-button type="button" class="filters__clear" (click)="clearFilters()">
+    <mat-icon>filter_alt_off</mat-icon>
+    Clear
+  </button>
+</section>
+
+<mat-progress-bar mode="indeterminate" class="loading-bar" [class.is-hidden]="!loading()" />
+
+<section class="table-card">
+  @if (members().length > 0) {
+    <div class="table-wrap">
+      <table mat-table [dataSource]="members()" class="member-table">
+        <ng-container matColumnDef="member">
+          <th mat-header-cell *matHeaderCellDef>Member</th>
+          <td mat-cell *matCellDef="let member">
+            <div class="person">
+              <span class="avatar">{{ initials(member) }}</span>
+              <div>
+                <strong>{{ member.fullName }}</strong>
+                <small>{{ member.email }}</small>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="contact">
+          <th mat-header-cell *matHeaderCellDef class="hide-sm">Phone</th>
+          <td mat-cell *matCellDef="let member" class="hide-sm">
+            <span class="muted">{{ member.phoneNo || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="roles">
+          <th mat-header-cell *matHeaderCellDef>Roles</th>
+          <td mat-cell *matCellDef="let member">
+            <div class="chips">
+              @for (role of member.roles; track role) {
+                <span [class]="roleClass(role)">{{ role }}</span>
+              }
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="cell">
+          <th mat-header-cell *matHeaderCellDef>Cell</th>
+          <td mat-cell *matCellDef="let member">
+            @if (member.cellName) {
+              <span class="cell-pill"><mat-icon>hub</mat-icon>{{ member.cellName }}</span>
+            } @else {
+              <span class="muted">Unassigned</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="login">
+          <th mat-header-cell *matHeaderCellDef class="hide-sm">Login</th>
+          <td mat-cell *matCellDef="let member" class="hide-sm">
+            @if (member.hasLogin) {
+              <span class="login-pill"><mat-icon>check</mat-icon>Active</span>
+            } @else {
+              <span class="muted">No account</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-col"></th>
+          <td mat-cell *matCellDef="let member" class="actions-col">
+            @if (auth.isAdmin()) {
+              <button mat-icon-button type="button" matTooltip="Edit member" (click)="editMember(member)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                matTooltip="Deactivate member"
+                class="danger"
+                (click)="deleteMember(member)"
+              >
+                <mat-icon>person_off</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [length]="total()"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPage($event)"
+      showFirstLastButtons
+    />
+  } @else if (!loading()) {
+    <app-empty-state
+      icon="group_off"
+      title="No members found"
+      message="Try a different search or filter, or add the first member to the directory."
+    />
+  }
+</section>

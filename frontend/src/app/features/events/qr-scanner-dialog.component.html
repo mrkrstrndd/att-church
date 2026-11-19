@@ -1,0 +1,84 @@
+<h2 mat-dialog-title>Scan member QR</h2>
+
+<mat-dialog-content class="scanner-content">
+  <div class="context">
+    <div class="context__icon"><mat-icon>qr_code_scanner</mat-icon></div>
+    <div>
+      <strong>{{ data.eventName }}</strong>
+      <span>{{ data.dayLabel }} · scan a member pass to check them in</span>
+    </div>
+  </div>
+
+  <div class="camera-frame">
+    <div id="member-qr-scanner" class="camera"></div>
+    @if (cameraState() === 'starting') {
+      <div class="camera-overlay">
+        <mat-spinner diameter="34" />
+        <span>Starting camera…</span>
+      </div>
+    } @else if (cameraState() === 'error') {
+      <div class="camera-overlay camera-overlay--error">
+        <mat-icon>no_photography</mat-icon>
+        <p>{{ cameraError() }}</p>
+        <button mat-stroked-button type="button" (click)="retryCamera()">Try camera again</button>
+      </div>
+    } @else if (cameraState() === 'paused') {
+      <div class="camera-overlay">
+        <mat-icon>image_search</mat-icon>
+        <span>Reading QR image…</span>
+      </div>
+    } @else {
+      <div class="scanner-reticle" aria-hidden="true"></div>
+    }
+  </div>
+
+  <p class="scanner-help">
+    Hold the member’s QR pass steady inside the frame. The camera stays open so you can scan the
+    next person immediately.
+  </p>
+
+  @if (feedback(); as result) {
+    <div class="feedback" [class]="'feedback feedback--' + result.state" role="status">
+      <mat-icon>
+        {{ result.state === 'error' ? 'error_outline' : result.state === 'already' ? 'info' : 'check_circle' }}
+      </mat-icon>
+      <div>
+        <strong>{{ result.title }}</strong>
+        <span>{{ result.detail }}</span>
+      </div>
+    </div>
+  }
+
+  <div class="scanner-footer">
+    <div class="session-count">
+      <mat-icon>how_to_reg</mat-icon>
+      <div>
+        <strong>{{ sessionCount() }}</strong>
+        <span>checked in this session</span>
+      </div>
+    </div>
+
+    <div class="file-action">
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="fileInput.click()"
+        [disabled]="fileScanning()"
+      >
+        <mat-icon>upload</mat-icon>
+        <span>{{ fileScanning() ? 'Reading…' : 'Upload QR image' }}</span>
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" type="button" (click)="close()">Done</button>
+</mat-dialog-actions>

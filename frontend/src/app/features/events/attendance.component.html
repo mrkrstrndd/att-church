@@ -1,0 +1,178 @@
+<div class="back-row">
+  <a mat-button routerLink="/events"><mat-icon>arrow_back</mat-icon>All events</a>
+</div>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading-bar" />
+}
+
+@if (event(); as current) {
+  <app-page-header
+    eyebrow="Attendance check-in"
+    [title]="current.name"
+    [subtitle]="dateRange() + (current.description ? ' · ' + current.description : '')"
+  >
+    @if (auth.isAdmin()) {
+      <button mat-stroked-button type="button" (click)="editEvent()">
+        <mat-icon>edit</mat-icon>
+        Edit event
+      </button>
+    }
+  </app-page-header>
+
+  @if (current.days.length > 0) {
+    <section class="attendance-summary">
+      <div class="count-card">
+        <div class="count-card__ring" [style.--progress]="(day()?.attendanceRatePercent ?? 0) + '%'">
+          <div class="count-card__inner">
+            <strong>{{ day()?.checkedInCount ?? 0 }}</strong>
+            <span>checked in</span>
+          </div>
+        </div>
+        <div class="count-card__copy">
+          <p class="eyebrow">Live count</p>
+          <h2>{{ day()?.attendanceRatePercent ?? 0 }}% of active members</h2>
+          <p>
+            {{ day()?.activeMemberCount ?? 0 }} active members{{ auth.isCellLeader() && !auth.isAdmin() ? ' in your cell' : '' }}.
+          </p>
+        </div>
+      </div>
+
+      <div class="day-picker" role="tablist" aria-label="Event days">
+        @for (eventDay of current.days; track eventDay.id) {
+          <button
+            type="button"
+            class="day-pill"
+            [class.day-pill--active]="selectedDayId() === eventDay.id"
+            (click)="selectDay(eventDay.id)"
+          >
+            <span>{{ dayLabel(eventDay.eventDate) }}</span>
+            <small>{{ eventDay.attendanceCount }} checked in</small>
+          </button>
+        }
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <mat-form-field appearance="outline" class="toolbar__search">
+        <mat-label>Find a member</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="search" placeholder="Name or email" />
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="toolbar__scan"
+        [disabled]="!day()"
+        (click)="openQrScanner()"
+      >
+        <mat-icon>qr_code_scanner</mat-icon>
+        Scan QR
+      </button>
+
+      <button
+        mat-stroked-button
+        type="button"
+        class="toolbar__checkin"
+        [disabled]="selectedMembers().length === 0 || checkingIn()"
+        (click)="checkInSelected()"
+      >
+        <mat-icon>how_to_reg</mat-icon>
+        Check in {{ selectedMembers().length || '' }} selected
+      </button>
+    </section>
+
+    @if (loadingDay()) {
+      <mat-progress-bar mode="indeterminate" class="day-loading" />
+    }
+
+    <section class="attendance-grid">
+      <article class="list-card">
+        <header class="list-card__head">
+          <div>
+            <h2>Not yet checked in</h2>
+            <p>{{ day()?.nonAttendees?.length ?? 0 }} shown</p>
+          </div>
+          <span class="list-badge list-badge--waiting">Waiting</span>
+        </header>
+
+        @if ((day()?.nonAttendees?.length ?? 0) > 0) {
+          <div class="member-list">
+            @for (member of day()!.nonAttendees; track member.id) {
+              <label class="person-row" [class.person-row--selected]="isSelected(member.id)">
+                <mat-checkbox
+                  [checked]="isSelected(member.id)"
+                  (change)="toggleSelection(member.id, $event.checked)"
+                />
+                <span class="avatar">{{ memberInitials(member) }}</span>
+                <span class="person-row__copy">
+                  <strong>{{ member.fullName }}</strong>
+                  <small>{{ member.cellName || 'Unassigned' }} · {{ member.email }}</small>
+                </span>
+                <span class="chips">
+                  @for (role of member.roles; track role) {
+                    <span [class]="roleClass(role)">{{ role }}</span>
+                  }
+                </span>
+              </label>
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            icon="task_alt"
+            title="Everyone is checked in"
+            message="Every active member in this scope has been recorded for the selected day."
+          />
+        }
+      </article>
+
+      <article class="list-card list-card--done">
+        <header class="list-card__head">
+          <div>
+            <h2>Checked in</h2>
+            <p>{{ day()?.attendees?.length ?? 0 }} shown</p>
+          </div>
+          <span class="list-badge list-badge--done"><mat-icon>check</mat-icon>Present</span>
+        </header>
+
+        @if ((day()?.attendees?.length ?? 0) > 0) {
+          <div class="member-list">
+            @for (member of day()!.attendees; track member.id) {
+              <div class="person-row person-row--present">
+                <span class="present-icon"><mat-icon>check</mat-icon></span>
+                <span class="avatar avatar--present">{{ memberInitials(member) }}</span>
+                <span class="person-row__copy">
+                  <strong>{{ member.fullName }}</strong>
+                  <small>{{ member.cellName || 'Unassigned' }} · {{ checkedInTime(member) }}</small>
+                </span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  matTooltip="Undo check-in"
+                  class="undo"
+                  (click)="undoCheckIn(member)"
+                >
+                  <mat-icon>undo</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <app-empty-state
+            icon="how_to_reg"
+            title="No one checked in yet"
+            message="Select members on the left and check them in as they arrive."
+          />
+        }
+      </article>
+    </section>
+  } @else {
+    <app-empty-state
+      icon="event_busy"
+      title="This event has no days"
+      message="Edit the event and make sure it has valid dates."
+    />
+  }
+}

@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit cell' : 'Create a cell' }}</h2>
+
+<mat-dialog-content>
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="form" novalidate>
+    <mat-form-field appearance="outline">
+      <mat-label>Cell name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. North Cell" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <mat-error>Cell name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3" placeholder="Where and when this cell meets"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Cell leader</mat-label>
+      <mat-select formControlName="leaderMemberId" [disabled]="loadingCandidates()">
+        @for (leader of leaderOptions(); track leader.id) {
+          <mat-option [value]="leader.id">{{ leader.fullName }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>Only members with the CellLeader role who do not already lead another cell.</mat-hint>
+      @if (form.controls.leaderMemberId.touched && form.controls.leaderMemberId.invalid) {
+        <mat-error>Choose a cell leader.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (!loadingCandidates() && leaderOptions().length === 0) {
+      <p class="hint-box">
+        <mat-icon>info</mat-icon>
+        No eligible leader is available. Grant the CellLeader role to a member first.
+      </p>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving()">Cancel</button>
+  <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="saving()">
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+      <span>Saving…</span>
+    } @else {
+      <span>{{ isEdit ? 'Save changes' : 'Create cell' }}</span>
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,115 @@
+<div class="auth-shell">
+  <section class="story">
+    <div class="story__grain"></div>
+    <div class="story__content">
+      <div class="story__brand">
+        <div class="story__mark"><mat-icon>church</mat-icon></div>
+        <div>
+          <strong>Grace Community</strong>
+          <span>Church Attendance</span>
+        </div>
+      </div>
+
+      <div class="story__message">
+        <p class="story__eyebrow">Shepherding the flock</p>
+        <h1>Know your people.<br />Care for every season.</h1>
+        <p class="story__body">
+          A gentle, dependable record of the moments your church gathers — so leaders can
+          follow up, celebrate growth, and keep no one unseen.
+        </p>
+      </div>
+
+      <figure class="story__verse">
+        <blockquote>
+          “And let us consider how we may spur one another on toward love and good deeds.”
+        </blockquote>
+        <figcaption>Hebrews 10:24</figcaption>
+      </figure>
+    </div>
+    <div class="story__ring story__ring--one"></div>
+    <div class="story__ring story__ring--two"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel__inner">
+      <div class="mobile-brand">
+        <div class="story__mark"><mat-icon>church</mat-icon></div>
+        <div><strong>Grace Community</strong><span>Church Attendance</span></div>
+      </div>
+
+      <div class="card">
+        <p class="card__eyebrow">Welcome back</p>
+        <h2>Sign in to continue</h2>
+        <p class="card__lead">Use the account provided by your church administrator.</p>
+
+        @if (error()) {
+          <div class="error-banner" role="alert">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ error() }}</span>
+          </div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <mat-form-field appearance="outline" class="field">
+            <mat-label>Username</mat-label>
+            <mat-icon matPrefix>person_outline</mat-icon>
+            <input matInput formControlName="username" autocomplete="username" autofocus />
+            @if (form.controls.username.hasError('required') && form.controls.username.touched) {
+              <mat-error>Username is required.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            <input
+              matInput
+              [type]="showPassword() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+            >
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (form.controls.password.hasError('required') && form.controls.password.touched) {
+              <mat-error>Password is required.</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-checkbox formControlName="rememberMe">Remember me</mat-checkbox>
+            <span class="form-row__hint">Keep me signed in for 30 days</span>
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            class="submit"
+            type="submit"
+            [disabled]="form.invalid || loading()"
+          >
+            @if (loading()) {
+              <mat-spinner diameter="20" />
+              <span>Signing in…</span>
+            } @else {
+              <span>Sign in</span>
+            }
+          </button>
+        </form>
+
+        <p class="card__foot">
+          <mat-icon>shield</mat-icon>
+          Secured with encrypted passwords and rotating sessions.
+        </p>
+      </div>
+
+      <p class="copyright">Grace Community Church · Attendance System</p>
+    </div>
+  </section>
+</div>

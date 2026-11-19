@@ -1,0 +1,82 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit event' : 'Create an event' }}</h2>
+
+<mat-dialog-content>
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form" class="form" novalidate>
+    <mat-form-field appearance="outline">
+      <mat-label>Event name</mat-label>
+      <input matInput formControlName="name" placeholder="e.g. Sunday Service" />
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <mat-error>Event name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3" placeholder="What is this gathering about?"></textarea>
+    </mat-form-field>
+
+    <div class="toggle-row">
+      <div>
+        <p class="toggle-row__label">Multi-day event</p>
+        <p class="toggle-row__hint">Off records a single day. On opens a start and end date range.</p>
+      </div>
+      <mat-slide-toggle formControlName="isMultiDay" (change)="toggleMultiDay()" />
+    </div>
+
+    @if (isMultiDay) {
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Event dates</mat-label>
+        <mat-date-range-input [rangePicker]="rangePicker" [formGroup]="form">
+          <input matStartDate formControlName="startDate" placeholder="Start date" />
+          <input matEndDate formControlName="endDate" placeholder="End date" />
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="rangePicker" />
+        <mat-date-range-picker #rangePicker />
+        @if (form.hasError('dateRangeRequired') && form.controls.endDate.touched) {
+          <mat-error>Both a start and end date are required.</mat-error>
+        } @else if (form.hasError('dateRangeInvalid')) {
+          <mat-error>The end date must be on or after the start date.</mat-error>
+        }
+      </mat-form-field>
+      <p class="date-hint">
+        <mat-icon>info</mat-icon>
+        One attendance sheet is created for each day in the range.
+      </p>
+    } @else {
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Event date</mat-label>
+        <input matInput [matDatepicker]="singlePicker" formControlName="startDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="singlePicker" />
+        <mat-datepicker #singlePicker />
+        @if (form.controls.startDate.touched && form.controls.startDate.invalid) {
+          <mat-error>Choose an event date.</mat-error>
+        }
+      </mat-form-field>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="saving()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="saving() || form.invalid"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+      <span>Saving…</span>
+    } @else {
+      <span>{{ isEdit ? 'Save changes' : 'Create event' }}</span>
+    }
+  </button>
+</mat-dialog-actions>

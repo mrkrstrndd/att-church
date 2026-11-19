@@ -1,0 +1,70 @@
+<app-page-header
+  eyebrow="Small groups"
+  title="Cells"
+  subtitle="The small communities where members are known, encouraged, and cared for."
+>
+  @if (auth.isAdmin()) {
+    <button mat-flat-button color="primary" type="button" (click)="createCell()">
+      <mat-icon>add</mat-icon>
+      Create cell
+    </button>
+  }
+</app-page-header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading-bar" />
+}
+
+@if (cells().length > 0) {
+  <section class="summary">
+    <div class="summary__item">
+      <span class="summary__icon"><mat-icon>hub</mat-icon></span>
+      <div><strong>{{ cells().length }}</strong><small>Active cells</small></div>
+    </div>
+    <div class="summary__item">
+      <span class="summary__icon summary__icon--gold"><mat-icon>groups</mat-icon></span>
+      <div><strong>{{ totalMembers() }}</strong><small>Members in cells</small></div>
+    </div>
+  </section>
+
+  <section class="cell-grid">
+    @for (cell of cells(); track cell.id) {
+      <article class="cell-card">
+        <div class="cell-card__top">
+          <div class="cell-card__mark"><mat-icon>hub</mat-icon></div>
+          <div class="cell-card__menu">
+            @if (auth.isAdmin()) {
+              <button mat-icon-button type="button" (click)="deleteCell(cell)" aria-label="Deactivate cell">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+
+        <h2>{{ cell.name }}</h2>
+        <p class="cell-card__description">{{ cell.description || 'A small group gathering for fellowship and care.' }}</p>
+
+        <div class="cell-card__leader">
+          <span class="leader-avatar">{{ cell.leaderName.charAt(0) }}</span>
+          <div>
+            <small>Cell leader</small>
+            <strong>{{ cell.leaderName }}</strong>
+          </div>
+        </div>
+
+        <div class="cell-card__foot">
+          <span class="member-count"><mat-icon>group</mat-icon>{{ cell.memberCount }} members</span>
+          <a mat-button [routerLink]="['/cells', cell.id]">Open <mat-icon>arrow_forward</mat-icon></a>
+        </div>
+      </article>
+    }
+  </section>
+} @else if (!loading()) {
+  <section class="table-card">
+    <app-empty-state
+      icon="hub"
+      title="No cells yet"
+      message="Create a cell and appoint a CellLeader to begin organizing the church into small groups."
+    />
+  </section>
+}

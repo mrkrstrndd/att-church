@@ -1,0 +1,39 @@
+# Build output
+**/bin/
+**/obj/
+node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Local tooling and caches
+.nuget/
+.dotnet8/
+.tools/
+.browser-tools/
+.npm-cache/
+.tmp/
+dotnet-tools.json
+.dotnet-install.ps1
+
+# Local PostgreSQL instance and logs
+.pgdata/
+.pglog
+logs/
+*.log
+
+# Verification artifacts
+/screenshots/
+.publish/
+verify-*.cjs
+inspect.cjs
+build-*.log
+xunit-run.log
+frontend-*.log
+
+# Environment secrets
+.env
+appsettings.*.local.json
+
+# Editors
+.vs/
+.vscode/

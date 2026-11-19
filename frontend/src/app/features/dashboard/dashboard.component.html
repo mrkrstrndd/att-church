@@ -1,0 +1,122 @@
+<app-page-header
+  eyebrow="Church pulse"
+  title="Dashboard"
+  subtitle="A clear view of how the congregation is gathering, caring, and growing."
+>
+  <form [formGroup]="rangeForm" class="range" (ngSubmit)="applyRange()">
+    <mat-form-field appearance="outline" class="range__field">
+      <mat-label>From</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="from" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <span class="range__dash">to</span>
+
+    <mat-form-field appearance="outline" class="range__field">
+      <mat-label>To</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="to" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" type="submit" class="range__apply">Apply</button>
+  </form>
+</app-page-header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading-bar" />
+}
+
+<section class="kpi-grid" aria-label="Key attendance figures">
+  @for (card of cards(); track card.label) {
+    <article class="kpi-card" [class]="'kpi-card kpi-card--' + card.tone">
+      <div class="kpi-card__top">
+        <span class="kpi-card__icon"><mat-icon>{{ card.icon }}</mat-icon></span>
+        @if (card.delta !== null) {
+          <span class="delta" [class.delta--down]="card.delta < 0">{{ deltaLabel(card.delta) }}</span>
+        }
+      </div>
+      <p class="kpi-card__label">{{ card.label }}</p>
+      <p class="kpi-card__value">{{ card.value }}</p>
+      <p class="kpi-card__note">{{ card.note }}</p>
+    </article>
+  }
+</section>
+
+<section class="chart-grid">
+  <article class="panel panel--wide">
+    <header class="panel__head">
+      <div>
+        <p class="panel__eyebrow">Last 12 weeks</p>
+        <h2>Weekly attendance trend</h2>
+      </div>
+      <span class="panel__hint">Total check-ins per week</span>
+    </header>
+    <div echarts [options]="weeklyOptions()" [autoResize]="true" class="chart chart--line"></div>
+  </article>
+
+  <article class="panel">
+    <header class="panel__head">
+      <div>
+        <p class="panel__eyebrow">Selected range</p>
+        <h2>Attendance by cell</h2>
+      </div>
+    </header>
+    @if ((byCell()?.cells?.length ?? 0) > 0) {
+      <div echarts [options]="cellOptions()" [autoResize]="true" class="chart chart--bar"></div>
+    } @else {
+      <app-empty-state
+        icon="hub"
+        title="No cell attendance yet"
+        message="Create cells and record attendance to see how each small group is gathering."
+      />
+    }
+  </article>
+
+  <article class="panel">
+    <header class="panel__head">
+      <div>
+        <p class="panel__eyebrow">Last 6 months</p>
+        <h2>Monthly comparison</h2>
+      </div>
+      <span class="panel__hint">Total and unique attendees</span>
+    </header>
+    <div echarts [options]="monthlyOptions()" [autoResize]="true" class="chart chart--monthly"></div>
+  </article>
+
+  <article class="panel panel--recent">
+    <header class="panel__head">
+      <div>
+        <p class="panel__eyebrow">Most recent</p>
+        <h2>Recent events</h2>
+      </div>
+      <a mat-button routerLink="/events" class="panel__link">All events <mat-icon>arrow_forward</mat-icon></a>
+    </header>
+
+    @if (recent().length > 0) {
+      <div class="recent-list">
+        @for (event of recent(); track event.id) {
+          <a class="recent" [routerLink]="['/events', event.id, 'attendance']">
+            <span class="recent__date">
+              <strong>{{ dayOfMonth(event.startDate) }}</strong>
+              <small>{{ monthShort(event.startDate) }}</small>
+            </span>
+            <span class="recent__copy">
+              <strong>{{ event.name }}</strong>
+              <small>{{ event.dayCount }} {{ event.dayCount === 1 ? 'day' : 'days' }} · avg {{ event.averagePerDay }}</small>
+            </span>
+            <span class="recent__count">{{ event.attendanceCount }}<small>check-ins</small></span>
+            <mat-icon>chevron_right</mat-icon>
+          </a>
+        }
+      </div>
+    } @else {
+      <app-empty-state
+        icon="event_busy"
+        title="No events yet"
+        message="Create your first event to start recording attendance."
+      />
+    }
+  </article>
+</section>
