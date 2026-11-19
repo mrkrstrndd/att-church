@@ -207,10 +207,51 @@ public class EndToEndFlowTests : IClassFixture<ApiFactory>
         Assert.NotNull(newQrScanResult);
         Assert.True(newQrScanResult!.AlreadyCheckedIn);
 
+        var vipLookup = await client.GetFromJsonAsync<List<VipLookupDto>>(
+            "/api/members/vip-lookup?lastName=Visitor");
+        Assert.NotNull(vipLookup);
+        Assert.Contains(vipLookup!, match => match.Id == vip.Id);
+
+        var inviterOptions = await client.GetFromJsonAsync<List<InviterOptionDto>>(
+            "/api/members/inviter-options?search=Dela");
+        Assert.NotNull(inviterOptions);
+        Assert.Contains(inviterOptions!, option => option.Id == member.Id);
+
+        var vipPath = $"/api/events/{createdEvent.Id}/days/{createdEvent.Days[0].Id}/attendance/vip";
+        var existingVipResponse = await client.PostAsJsonAsync(vipPath, new
+        {
+            existingMemberId = vip.Id
+        });
+        Assert.Equal(HttpStatusCode.OK, existingVipResponse.StatusCode);
+        var existingVipResult = await existingVipResponse.Content.ReadFromJsonAsync<VipCheckInResultDto>();
+        Assert.NotNull(existingVipResult);
+        Assert.False(existingVipResult!.Created);
+        Assert.False(existingVipResult.AlreadyCheckedIn);
+        Assert.Equal(2, existingVipResult.CheckedInCount);
+
+        var newVipResponse = await client.PostAsJsonAsync(vipPath, new
+        {
+            lastName = "Walkin",
+            firstName = "Wendy",
+            email = "wendy.walkin@example.com",
+            invitedByMemberId = member.Id
+        });
+        Assert.Equal(HttpStatusCode.OK, newVipResponse.StatusCode);
+        var newVipResult = await newVipResponse.Content.ReadFromJsonAsync<VipCheckInResultDto>();
+        Assert.NotNull(newVipResult);
+        Assert.True(newVipResult!.Created);
+        Assert.Equal(3, newVipResult.CheckedInCount);
+
+        var newVip = await client.GetFromJsonAsync<MemberDto>($"/api/members/{newVipResult.MemberId}");
+        Assert.NotNull(newVip);
+        Assert.Contains("VIP", newVip!.Roles);
+        Assert.Null(newVip.CellId);
+        Assert.Equal(member.FullName, newVip.InvitedByName);
+
         var kpis = await client.GetFromJsonAsync<DashboardKpisDto>("/api/dashboard/kpis");
         Assert.NotNull(kpis);
-        Assert.Equal(3, kpis!.TotalActiveMembers);
-        Assert.Equal(1, kpis.LastEvent?.Attendance);
+        Assert.Equal(4, kpis!.TotalActiveMembers);
+        Assert.Equal(3, kpis.LastEvent?.Attendance);
         Assert.True(kpis.AverageAttendance > 0);
 
         var monthly = await client.GetAsync("/api/dashboard/monthly-comparison");

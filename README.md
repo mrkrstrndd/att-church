@@ -14,6 +14,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 - **Events** with a single-day/multi-day toggle, server-generated `event_days`, and protected date edits when attendance already exists.
 - **Attendance check-in** for Admins and Cell Leaders, with idempotent check-ins, per-day tabs, search, live counts, and undo.
 - **QR check-in**: every member has a unique QR pass, available from **Members → Edit member**, with download/print and rotation. Attendance pages include a camera QR scanner plus image-upload fallback.
+- **VIP check-in**: from **Events → Attendance**, Admins can add a walk-in VIP with an optional inviter. Last-name lookup reuses an existing VIP account; otherwise a VIP with no cell or login is created and checked in immediately.
 - **Dashboard** with KPI cards, zero-filled weekly trend, attendance by cell, six-month comparison, recent-event widget, date-range filter, and ECharts visualizations.
 - **Security**: BCrypt work factor 11, role-based authorization, ProblemDetails errors, lockout, token rotation/reuse revocation, CORS allow-list, and forced password change.
 - **Responsive UI** built with Angular Material, designed for mobile check-in.
@@ -190,7 +191,7 @@ TLS is expected to terminate at a reverse proxy for the Docker demo (nginx serve
   - one attendance row per member per event day,
   - unique member email, username, and cell name.
 
-Relevant entities: `users`, `refresh_tokens`, `members` (including `qr_token`), `member_roles`, `roles`, `cells`, `events`, `event_days`, `attendance`.
+Relevant entities: `users`, `refresh_tokens`, `members` (including `qr_token` and `invited_by_member_id`), `member_roles`, `roles`, `cells`, `events`, `event_days`, `attendance`.
 
 ## API summary
 
@@ -199,10 +200,10 @@ All routes are under `/api`. Errors use RFC 7807 `ProblemDetails`. Lists default
 | Area | Endpoints |
 |---|---|
 | Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `POST /auth/change-password`, `GET /auth/me` |
-| Members | `GET /members`, `GET /members/{id}`, `POST /members`, `PUT /members/{id}`, `DELETE /members/{id}`, `GET /members/{id}/qr-code`, `POST /members/{id}/qr-code/rotate` |
+| Members | `GET /members`, `GET /members/{id}`, `POST /members`, `PUT /members/{id}`, `DELETE /members/{id}`, `GET /members/{id}/qr-code`, `POST /members/{id}/qr-code/rotate`, `GET /members/vip-lookup?lastName=`, `GET /members/inviter-options?search=` |
 | Cells | `GET /cells`, `GET /cells/{id}`, `POST /cells`, `PUT /cells/{id}`, `DELETE /cells/{id}`, `POST /cells/{id}/members`, `DELETE /cells/{id}/members/{memberId}` |
 | Events | `GET /events`, `GET /events/{id}`, `POST /events`, `PUT /events/{id}`, `DELETE /events/{id}?force=true` |
-| Attendance | `GET/POST /events/{eventId}/days/{dayId}/attendance`, `POST .../attendance/scan`, `DELETE .../attendance/{memberId}` |
+| Attendance | `GET/POST /events/{eventId}/days/{dayId}/attendance`, `POST .../attendance/scan`, `POST .../attendance/vip`, `DELETE .../attendance/{memberId}` |
 | Dashboard | `/dashboard/kpis`, `/dashboard/weekly-trend`, `/dashboard/attendance-by-cell`, `/dashboard/monthly-comparison`, `/dashboard/recent-events` |
 
 Use Swagger for request/response schemas.
@@ -223,12 +224,34 @@ Implementation details:
 - Regenerating a QR immediately invalidates the previous code.
 - Camera access requires **HTTPS** (or `localhost`). Image upload is available as a fallback on HTTP/LAN deployments.
 
+## VIP check-in
+
+1. Sign in as an Admin and open **Events → Attendance** for the correct event day.
+2. Click **Add VIP**.
+3. Start typing the attendee’s last name. The app searches active VIP accounts:
+   - One match is selected automatically.
+   - Multiple matches are shown so the correct person can be chosen.
+   - If no match exists, complete the first name, email, and optional phone number.
+4. Optionally choose the member who invited them. Leave **Invited by** blank for a walk-in.
+5. Click **Add & check in** (or **Check in existing VIP**).
+6. The VIP is immediately marked present for that event day.
+
+Implementation details:
+
+- A newly created quick VIP has the `VIP` role, no cell, and **no login account**.
+- Existing VIPs are checked in through their existing member ID; duplicate check-in is idempotent.
+- The server also reuses an existing VIP when the exact first and last name already exist.
+- `invited_by_member_id` stores the optional inviter; VIPs are excluded from the inviter picker.
+- The quick-add endpoints are Admin-only because VIPs are outside Cell Leader scope.
+- Every VIP receives a QR pass automatically and can later download it from **Members → Edit**.
+
 ## Business-rule defaults chosen
 
 The specification left several decisions open. This implementation uses:
 
 - **Cell leader validation:** assigning a leader without the `CellLeader` role is rejected with `400`; the role is **not** auto-granted.
 - **VIP role:** VIP is mutually exclusive with Member, CellLeader, and Admin, and a VIP cannot be assigned to a cell. In the member form, choosing VIP clears other roles and the cell; choosing a cell switches the member to Member. VIP members cannot be added to a cell until their role is changed.
+- **VIP quick check-in:** Admins can add a VIP from the attendance page. The optional inviter is stored on the member; last-name lookup reuses an existing VIP, otherwise a new VIP is created with no cell or login and checked in immediately.
 - **Login creation:** only Admins can create member login accounts. The API enforces this independently of the UI.
 - **Cell membership:** one cell per member. Adding a member who already belongs to another cell is rejected.
 - **Leader membership:** when a leader has no cell, creating/updating a cell adds them to it as a member. A leader may also be a member elsewhere.
@@ -259,7 +282,7 @@ The specification left several decisions open. This implementation uses:
 dotnet test ChurchAttendance.sln
 ```
 
-Covered: forced password change, login, member creation, Admin-only login creation, VIP exclusivity and cell restrictions, QR generation/scan/rotation, event/day generation, attendance check-in, dashboard KPIs/monthly endpoint, event date protection, cell leader validation, login lockout, refresh rotation/reuse, and BCrypt verification.
+Covered: forced password change, login, member creation, Admin-only login creation, VIP exclusivity and cell restrictions, VIP last-name lookup/inviter/check-in, QR generation/scan/rotation, event/day generation, attendance check-in, dashboard KPIs/monthly endpoint, event date protection, cell leader validation, login lockout, refresh rotation/reuse, and BCrypt verification.
 
 ### Frontend
 
@@ -283,6 +306,10 @@ Covered: token storage for Remember me, refresh rotation, login form validation,
 | Member QR pass | VIP role form |
 |---|---|
 | ![Member QR pass](docs/screenshots/member-qr.png) | ![VIP role](docs/screenshots/vip-role.png) |
+
+| VIP check-in |
+|---|
+| ![VIP check-in](docs/screenshots/vip-checkin.png) |
 
 ## Notes on the reference specification
 

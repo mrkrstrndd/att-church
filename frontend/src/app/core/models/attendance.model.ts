@@ -33,3 +33,20 @@ export interface ScanCheckInResult {
   alreadyCheckedIn: boolean;
   checkedInCount: number;
 }
+
+export interface CreateVipCheckInPayload {
+  existingMemberId: string | null;
+  lastName: string | null;
+  firstName: string | null;
+  email: string | null;
+  phoneNo: string | null;
+  invitedByMemberId: string | null;
+}
+
+export interface VipCheckInResult {
+  memberId: string;
+  memberName: string;
+  created: boolean;
+  alreadyCheckedIn: boolean;
+  checkedInCount: number;
+}

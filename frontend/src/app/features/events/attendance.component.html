@@ -72,6 +72,19 @@
         Scan QR
       </button>
 
+      @if (auth.isAdmin()) {
+        <button
+          mat-stroked-button
+          type="button"
+          class="toolbar__vip"
+          [disabled]="!day()"
+          (click)="openVipCheckIn()"
+        >
+          <mat-icon>person_add_alt</mat-icon>
+          Add VIP
+        </button>
+      }
+
       <button
         mat-stroked-button
         type="button"

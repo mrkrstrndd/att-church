@@ -37,6 +37,7 @@ public class MemberService
             .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
             .Include(m => m.Cell)
             .Include(m => m.User)
+            .Include(m => m.InvitedBy)
             .AsQueryable();
 
         if (!query.IncludeInactive || !actor.IsAdmin)
@@ -81,6 +82,60 @@ public class MemberService
         var member = await QueryMembers().FirstOrDefaultAsync(m => m.Id == id, ct)
                      ?? throw new NotFoundException("Member not found.");
         return ToDto(member);
+    }
+
+    public async Task<IReadOnlyList<VipLookupDto>> LookupVipsByLastNameAsync(
+        string? lastName, CancellationToken ct = default)
+    {
+        var term = (lastName ?? string.Empty).Trim().ToLowerInvariant();
+        if (term.Length < 2)
+            return Array.Empty<VipLookupDto>();
+
+        var members = await _db.Members
+            .AsNoTracking()
+            .Include(m => m.InvitedBy)
+            .Where(m => m.IsActive && m.CellId == null && m.LastName.ToLower().StartsWith(term))
+            .Where(m => m.MemberRoles.Any(mr => mr.Role.Name == RoleNames.Vip))
+            .OrderBy(m => m.FirstName)
+            .ThenBy(m => m.LastName)
+            .Take(20)
+            .ToListAsync(ct);
+
+        return members.Select(m => new VipLookupDto(
+            m.Id,
+            m.FirstName,
+            m.LastName,
+            m.FullName,
+            m.Email,
+            m.PhoneNo,
+            m.InvitedBy?.FullName)).ToList();
+    }
+
+    public async Task<IReadOnlyList<InviterOptionDto>> GetInviterOptionsAsync(
+        string? search, CancellationToken ct = default)
+    {
+        var members = _db.Members
+            .AsNoTracking()
+            .Include(m => m.Cell)
+            .Where(m => m.IsActive)
+            .Where(m => !m.MemberRoles.Any(mr => mr.Role.Name == RoleNames.Vip));
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLowerInvariant();
+            members = members.Where(m =>
+                m.FirstName.ToLower().Contains(term) ||
+                m.LastName.ToLower().Contains(term) ||
+                m.Email.ToLower().Contains(term));
+        }
+
+        var results = await members
+            .OrderBy(m => m.LastName)
+            .ThenBy(m => m.FirstName)
+            .Take(50)
+            .ToListAsync(ct);
+
+        return results.Select(m => new InviterOptionDto(m.Id, m.FullName, m.Cell?.Name)).ToList();
     }
 
     public async Task<MemberQrCodeDto> GetQrCodeAsync(Guid id, CancellationToken ct = default)
@@ -238,12 +293,14 @@ public class MemberService
         .AsNoTracking()
         .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
         .Include(m => m.Cell)
-        .Include(m => m.User);
+        .Include(m => m.User)
+        .Include(m => m.InvitedBy);
 
     private IQueryable<Member> QueryTracked() => _db.Members
         .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
         .Include(m => m.Cell)
-        .Include(m => m.User);
+        .Include(m => m.User)
+        .Include(m => m.InvitedBy);
 
     private async Task<List<Role>> LoadRolesAsync(IReadOnlyCollection<string> roleNames, CancellationToken ct)
     {
@@ -331,7 +388,9 @@ public class MemberService
             roles,
             member.User is not null,
             member.IsActive,
-            member.CreatedAt);
+            member.CreatedAt,
+            member.InvitedByMemberId,
+            member.InvitedBy?.FullName);
     }
 
     private static MemberQrCodeDto ToQrCodeDto(Member member) =>

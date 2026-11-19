@@ -176,6 +176,115 @@ public class AttendanceService
             total);
     }
 
+    public async Task<VipCheckInResultDto> CreateOrCheckInVipAsync(
+        Guid eventId,
+        Guid dayId,
+        CreateVipCheckInRequest request,
+        ActorContext actor,
+        CancellationToken ct = default)
+    {
+        if (!actor.IsAdmin)
+            throw new ForbiddenException("Only administrators can add VIP attendees.");
+
+        await LoadDayAsync(eventId, dayId, ct);
+
+        Member member;
+        var created = false;
+
+        if (request.ExistingMemberId is Guid existingMemberId)
+        {
+            member = await _db.Members
+                .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
+                .FirstOrDefaultAsync(m => m.Id == existingMemberId && m.IsActive, ct)
+                ?? throw new NotFoundException("VIP member not found.");
+
+            if (!IsVip(member) || member.CellId is not null)
+                throw new AppValidationException(
+                    nameof(request.ExistingMemberId),
+                    "The selected account is not an unassigned VIP member.");
+        }
+        else
+        {
+            var lastName = Required(request.LastName, nameof(request.LastName));
+            var firstName = Required(request.FirstName, nameof(request.FirstName));
+            var email = Required(request.Email, nameof(request.Email)).ToLowerInvariant();
+
+            // Also protect direct API calls: if the exact same VIP name already exists,
+            // reuse it instead of creating a duplicate.
+            var matched = await _db.Members
+                .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
+                .FirstOrDefaultAsync(m =>
+                    m.IsActive &&
+                    m.CellId == null &&
+                    m.LastName.ToLower() == lastName.ToLower() &&
+                    m.FirstName.ToLower() == firstName.ToLower() &&
+                    m.MemberRoles.Any(mr => mr.Role.Name == RoleNames.Vip), ct);
+
+            if (matched is not null)
+            {
+                member = matched;
+            }
+            else
+            {
+                if (await _db.Members.AnyAsync(m => m.Email == email, ct))
+                    throw new ConflictException("A member with that email already exists.");
+
+                var inviter = await ValidateInviterAsync(request.InvitedByMemberId, ct);
+                var vipRole = await _db.Roles.SingleAsync(r => r.Name == RoleNames.Vip, ct);
+                var now = _clock.UtcNow;
+
+                member = new Member
+                {
+                    Id = Guid.NewGuid(),
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    PhoneNo = CleanOptional(request.PhoneNo),
+                    CellId = null,
+                    InvitedByMemberId = inviter?.Id,
+                    IsActive = true,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                };
+                member.MemberRoles.Add(new MemberRole
+                {
+                    MemberId = member.Id,
+                    RoleId = vipRole.Id,
+                    Role = vipRole
+                });
+
+                _db.Members.Add(member);
+                created = true;
+            }
+        }
+
+        var alreadyCheckedIn = await _db.Attendance
+            .AnyAsync(a => a.EventDayId == dayId && a.MemberId == member.Id, ct);
+
+        if (!alreadyCheckedIn)
+        {
+            _db.Attendance.Add(new Domain.Entities.Attendance
+            {
+                Id = Guid.NewGuid(),
+                EventDayId = dayId,
+                MemberId = member.Id,
+                CheckedInAt = _clock.UtcNow,
+                RecordedBy = actor.UserId
+            });
+        }
+
+        await _db.SaveChangesAsync(ct);
+
+        var total = await _db.Attendance.CountAsync(a => a.EventDayId == dayId, ct);
+
+        return new VipCheckInResultDto(
+            member.Id,
+            member.FullName,
+            created,
+            alreadyCheckedIn,
+            total);
+    }
+
     public async Task RemoveAsync(Guid eventId, Guid dayId, Guid memberId, ActorContext actor, CancellationToken ct = default)
     {
         await LoadDayAsync(eventId, dayId, ct);
@@ -226,6 +335,44 @@ public class AttendanceService
             member.Cell?.Name,
             member.MemberRoles.OrderBy(mr => mr.RoleId).Select(mr => mr.Role.Name).ToList(),
             checkedInAt);
+
+    private async Task<Member?> ValidateInviterAsync(Guid? inviterId, CancellationToken ct)
+    {
+        if (inviterId is null)
+            return null;
+
+        var inviter = await _db.Members
+            .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
+            .FirstOrDefaultAsync(m => m.Id == inviterId && m.IsActive, ct)
+            ?? throw new AppValidationException(
+                "invitedByMemberId",
+                "The selected inviter is not an active member.");
+
+        if (inviter.MemberRoles.Any(mr =>
+                string.Equals(mr.Role.Name, RoleNames.Vip, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new AppValidationException(
+                "invitedByMemberId",
+                "A VIP cannot be selected as the inviter.");
+        }
+
+        return inviter;
+    }
+
+    private static bool IsVip(Member member) =>
+        member.MemberRoles.Any(mr =>
+            string.Equals(mr.Role.Name, RoleNames.Vip, StringComparison.OrdinalIgnoreCase));
+
+    private static string Required(string? value, string field)
+    {
+        var cleaned = (value ?? string.Empty).Trim();
+        if (cleaned.Length == 0)
+            throw new AppValidationException(field, "This field is required.");
+        return cleaned;
+    }
+
+    private static string? CleanOptional(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
     private static bool Matches(AttendanceMemberDto member, string term) =>
         member.FullName.Contains(term, StringComparison.OrdinalIgnoreCase) ||

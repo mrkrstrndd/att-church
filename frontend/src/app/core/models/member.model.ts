@@ -13,6 +13,8 @@ export interface Member {
   hasLogin: boolean;
   isActive: boolean;
   createdAt: string;
+  invitedByMemberId: string | null;
+  invitedByName: string | null;
 }
 
 export interface CreateLogin {
@@ -44,4 +46,20 @@ export interface MemberQrCode {
   memberId: string;
   memberName: string;
   payload: string;
+}
+
+export interface VipLookup {
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  phoneNo: string | null;
+  invitedByName: string | null;
+}
+
+export interface InviterOption {
+  id: string;
+  fullName: string;
+  cellName: string | null;
 }

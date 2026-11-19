@@ -36,4 +36,37 @@ describe('MemberService QR endpoints', () => {
     expect(rotate.request.method).toBe('POST');
     rotate.flush(rotated);
   });
+
+  it('loads VIP matches and inviter options', () => {
+    const matches = [
+      {
+        id: 'vip-1',
+        firstName: 'Vera',
+        lastName: 'Visitor',
+        fullName: 'Vera Visitor',
+        email: 'vera@example.com',
+        phoneNo: null,
+        invitedByName: null
+      }
+    ];
+
+    service.lookupVips('Vis').subscribe((value) => expect(value).toEqual(matches));
+    const lookup = http.expectOne(
+      (request) =>
+        request.url === '/api/members/vip-lookup' &&
+        request.params.get('lastName') === 'Vis'
+    );
+    expect(lookup.request.method).toBe('GET');
+    lookup.flush(matches);
+
+    const inviters = [{ id: 'member-1', fullName: 'Juan Dela Cruz', cellName: 'North Cell' }];
+    service.inviterOptions('Juan').subscribe((value) => expect(value).toEqual(inviters));
+    const options = http.expectOne(
+      (request) =>
+        request.url === '/api/members/inviter-options' &&
+        request.params.get('search') === 'Juan'
+    );
+    expect(options.request.method).toBe('GET');
+    options.flush(inviters);
+  });
 });

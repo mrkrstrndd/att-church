@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE, PagedResult } from '../api';
-import { Member, MemberPayload, MemberQrCode, MemberQuery } from '../models/member.model';
+import { Member, MemberPayload, MemberQrCode, MemberQuery, VipLookup, InviterOption } from '../models/member.model';
 
 @Injectable({ providedIn: 'root' })
 export class MemberService {
@@ -54,5 +54,19 @@ export class MemberService {
 
   rotateQrCode(id: string): Observable<MemberQrCode> {
     return this.http.post<MemberQrCode>(`${API_BASE}/members/${id}/qr-code/rotate`, {});
+  }
+
+  lookupVips(lastName: string): Observable<VipLookup[]> {
+    return this.http.get<VipLookup[]>(`${API_BASE}/members/vip-lookup`, {
+      params: new HttpParams().set('lastName', lastName)
+    });
+  }
+
+  inviterOptions(search = ''): Observable<InviterOption[]> {
+    let params = new HttpParams();
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<InviterOption[]>(`${API_BASE}/members/inviter-options`, { params });
   }
 }

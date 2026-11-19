@@ -49,6 +49,22 @@ public class MembersController : ControllerBase
     public async Task<ActionResult<MemberQrCodeDto>> GetQrCode(Guid id, CancellationToken ct) =>
         Ok(await _members.GetQrCodeAsync(id, ct));
 
+    [HttpGet("vip-lookup")]
+    [Authorize(Roles = RoleNames.Admin)]
+    [ProducesResponseType(typeof(IReadOnlyList<VipLookupDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<VipLookupDto>>> LookupVips(
+        [FromQuery] string? lastName,
+        CancellationToken ct) =>
+        Ok(await _members.LookupVipsByLastNameAsync(lastName, ct));
+
+    [HttpGet("inviter-options")]
+    [Authorize(Roles = RoleNames.Admin)]
+    [ProducesResponseType(typeof(IReadOnlyList<InviterOptionDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<InviterOptionDto>>> GetInviterOptions(
+        [FromQuery] string? search,
+        CancellationToken ct) =>
+        Ok(await _members.GetInviterOptionsAsync(search, ct));
+
     [HttpPost("{id:guid}/qr-code/rotate")]
     [Authorize(Roles = RoleNames.Admin)]
     [ProducesResponseType(typeof(MemberQrCodeDto), StatusCodes.Status200OK)]

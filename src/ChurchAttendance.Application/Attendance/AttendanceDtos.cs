@@ -30,3 +30,18 @@ public record ScanCheckInResultDto(
     string MemberName,
     bool AlreadyCheckedIn,
     int CheckedInCount);
+
+public record CreateVipCheckInRequest(
+    Guid? ExistingMemberId,
+    string? LastName,
+    string? FirstName,
+    string? Email,
+    string? PhoneNo,
+    Guid? InvitedByMemberId);
+
+public record VipCheckInResultDto(
+    Guid MemberId,
+    string MemberName,
+    bool Created,
+    bool AlreadyCheckedIn,
+    int CheckedInCount);

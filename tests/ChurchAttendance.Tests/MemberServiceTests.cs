@@ -97,6 +97,43 @@ public class MemberServiceTests
         Assert.Contains("administrators", exception.Message);
     }
 
+    [Fact]
+    public async Task LookupVipsByLastNameAsync_ReturnsOnlyActiveVipPrefixMatches()
+    {
+        await using var db = TestDb.Create();
+        var vip = TestDb.Member("lookup.vip@example.com", "Vera", "Visitor");
+        var member = TestDb.Member("lookup.member@example.com", "Victor", "Visitor");
+        db.Members.AddRange(vip, member);
+        db.MemberRoles.Add(new MemberRole { MemberId = vip.Id, RoleId = TestDb.Role(db, RoleNames.Vip).Id });
+        db.MemberRoles.Add(new MemberRole { MemberId = member.Id, RoleId = TestDb.Role(db, RoleNames.Member).Id });
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+        var results = await service.LookupVipsByLastNameAsync("vis");
+
+        var match = Assert.Single(results);
+        Assert.Equal(vip.Id, match.Id);
+        Assert.Empty(await service.LookupVipsByLastNameAsync("x"));
+    }
+
+    [Fact]
+    public async Task GetInviterOptionsAsync_ExcludesVipMembers()
+    {
+        await using var db = TestDb.Create();
+        var vip = TestDb.Member("inviter.vip@example.com", "Vera", "Visitor");
+        var member = TestDb.Member("inviter.member@example.com", "Mia", "Member");
+        db.Members.AddRange(vip, member);
+        db.MemberRoles.Add(new MemberRole { MemberId = vip.Id, RoleId = TestDb.Role(db, RoleNames.Vip).Id });
+        db.MemberRoles.Add(new MemberRole { MemberId = member.Id, RoleId = TestDb.Role(db, RoleNames.Member).Id });
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+        var options = await service.GetInviterOptionsAsync("");
+
+        Assert.Contains(options, o => o.Id == member.Id);
+        Assert.DoesNotContain(options, o => o.Id == vip.Id);
+    }
+
     private static MemberService CreateService(Infrastructure.Persistence.AppDbContext db) =>
         new(
             db,

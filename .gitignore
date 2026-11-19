@@ -8,6 +8,7 @@ frontend/.angular/
 # Local tooling and caches
 .nuget/
 .dotnet8/
+.dotnet-home/
 .tools/
 .browser-tools/
 .npm-cache/

@@ -79,6 +79,13 @@
       </div>
     </div>
 
+    @if (isEdit && data.member?.invitedByName) {
+      <div class="invited-by span-2">
+        <mat-icon>person_add_alt</mat-icon>
+        <span>Invited by <strong>{{ data.member?.invitedByName }}</strong></span>
+      </div>
+    }
+
     @if (isEdit) {
       <div class="qr-panel span-2">
         <div class="qr-panel__preview">

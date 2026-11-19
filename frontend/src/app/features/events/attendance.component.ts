@@ -16,10 +16,11 @@ import { PageHeaderComponent } from '../../shared/page-header.component';
 import { EmptyStateComponent } from '../../shared/empty-state.component';
 import { EventFormDialogComponent } from '../events/event-form-dialog.component';
 import { QrScannerDialogComponent, QrScannerDialogData } from './qr-scanner-dialog.component';
+import { VipCheckInDialogComponent, VipCheckInDialogData } from './vip-check-in-dialog.component';
 import { EventService } from '../../core/services/event.service';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
-import { AttendanceDay, AttendanceMember } from '../../core/models/attendance.model';
+import { AttendanceDay, AttendanceMember, VipCheckInResult } from '../../core/models/attendance.model';
 import { ChurchEvent } from '../../core/models/event.model';
 import { apiErrorMessage, formatDate, formatDateTime } from '../../core/utils';
 
@@ -172,6 +173,41 @@ export class AttendanceComponent implements OnInit {
             'Close',
             { duration: 3500 }
           );
+        }
+        this.loadDay(this.search.value);
+      });
+  }
+
+  openVipCheckIn(): void {
+    const event = this.event();
+    const day = this.day();
+    if (!event || !day) {
+      return;
+    }
+
+    const data: VipCheckInDialogData = {
+      eventId: event.id,
+      dayId: day.dayId,
+      eventName: event.name,
+      dayLabel: this.dayLabel(day.eventDate)
+    };
+
+    this.dialog
+      .open(VipCheckInDialogComponent, {
+        data,
+        width: '640px',
+        maxWidth: '94vw',
+        autoFocus: false
+      })
+      .afterClosed()
+      .subscribe((result: VipCheckInResult | undefined) => {
+        if (result) {
+          const message = result.alreadyCheckedIn
+            ? `${result.memberName} is already checked in.`
+            : result.created
+              ? `${result.memberName} was added as a VIP and checked in.`
+              : `${result.memberName} checked in as a VIP.`;
+          this.snackBar.open(message, 'Close', { duration: 4000 });
         }
         this.loadDay(this.search.value);
       });

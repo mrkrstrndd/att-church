@@ -84,7 +84,9 @@ export class CellFormDialogComponent {
               roles: ['CellLeader'],
               hasLogin: false,
               isActive: true,
-              createdAt: ''
+              createdAt: '',
+              invitedByMemberId: null,
+              invitedByName: null
             });
           }
           this.candidates.set(members);

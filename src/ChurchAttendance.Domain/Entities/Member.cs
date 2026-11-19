@@ -12,6 +12,10 @@ public class Member
     public Guid? CellId { get; set; }
     public Cell? Cell { get; set; }
 
+    public Guid? InvitedByMemberId { get; set; }
+    public Member? InvitedBy { get; set; }
+    public ICollection<Member> Invitees { get; set; } = new List<Member>();
+
     public bool IsActive { get; set; } = true;
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;

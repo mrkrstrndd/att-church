@@ -44,6 +44,16 @@ public class AttendanceController : ControllerBase
         CancellationToken ct) =>
         Ok(await _attendance.ScanQrCodeAsync(eventId, dayId, request, User.ToActor(), ct));
 
+    [HttpPost("vip")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(VipCheckInResultDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<VipCheckInResultDto>> CreateOrCheckInVip(
+        Guid eventId,
+        Guid dayId,
+        CreateVipCheckInRequest request,
+        CancellationToken ct) =>
+        Ok(await _attendance.CreateOrCheckInVipAsync(eventId, dayId, request, User.ToActor(), ct));
+
     [HttpDelete("{memberId:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Remove(Guid eventId, Guid dayId, Guid memberId, CancellationToken ct)

@@ -20,6 +20,24 @@
   background: rgba(247, 243, 234, 0.55);
 }
 
+.invited-by {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  margin-top: -0.15rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.55rem;
+  background: rgba(181, 138, 74, 0.08);
+  color: #7a541e;
+  font-size: 0.7rem;
+}
+
+.invited-by mat-icon {
+  font-size: 1rem;
+  height: 1rem;
+  width: 1rem;
+}
+
 .qr-panel {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

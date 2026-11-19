@@ -231,6 +231,10 @@ namespace ChurchAttendance.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("first_name");
 
+                    b.Property<Guid?>("InvitedByMemberId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("invited_by_member_id");
+
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -269,6 +273,9 @@ namespace ChurchAttendance.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("InvitedByMemberId")
+                        .HasDatabaseName("ix_members_invited_by");
 
                     b.HasIndex("QrToken")
                         .IsUnique();
@@ -511,7 +518,14 @@ namespace ChurchAttendance.Infrastructure.Persistence.Migrations
                         .HasForeignKey("CellId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("ChurchAttendance.Domain.Entities.Member", "InvitedBy")
+                        .WithMany("Invitees")
+                        .HasForeignKey("InvitedByMemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Cell");
+
+                    b.Navigation("InvitedBy");
                 });
 
             modelBuilder.Entity("ChurchAttendance.Domain.Entities.MemberRole", b =>
@@ -573,6 +587,8 @@ namespace ChurchAttendance.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("ChurchAttendance.Domain.Entities.Member", b =>
                 {
                     b.Navigation("AttendanceRecords");
+
+                    b.Navigation("Invitees");
 
                     b.Navigation("LedCell");
 

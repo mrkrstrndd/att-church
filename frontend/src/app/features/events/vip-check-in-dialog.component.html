@@ -1,0 +1,171 @@
+<h2 mat-dialog-title>
+  <span>Add VIP attendee</span>
+  <small>{{ data.eventName }} · {{ data.dayLabel }}</small>
+</h2>
+
+<mat-dialog-content>
+  <div class="vip-intro">
+    <mat-icon>star_outline</mat-icon>
+    <p>
+      VIPs are attendees who are not connected to a cell leader. No login account is created, and
+      they are checked in immediately.
+    </p>
+  </div>
+
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <div class="form-grid" [formGroup]="form">
+    <mat-form-field appearance="outline" class="lookup-field">
+      <mat-label>Last name</mat-label>
+      <input matInput formControlName="lastName" autocomplete="off" placeholder="Start typing a last name" />
+      @if (lookupLoading()) {
+        <mat-spinner matSuffix diameter="18" />
+      }
+      <mat-hint>We check for an existing VIP account as you type.</mat-hint>
+      @if (form.controls.lastName.touched && form.controls.lastName.hasError('required')) {
+        <mat-error>Last name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>First name</mat-label>
+      <input matInput formControlName="firstName" autocomplete="off" />
+      @if (form.controls.firstName.touched && form.controls.firstName.hasError('required')) {
+        <mat-error>First name is required.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (lookupMatches().length > 0 && !selectedExisting() && !createNew()) {
+      <div class="lookup-panel span-2">
+        <p class="lookup-panel__title">
+          <mat-icon>person_search</mat-icon>
+          Existing VIP {{ lookupMatches().length === 1 ? 'account' : 'accounts' }} found
+        </p>
+        <div class="match-list">
+          @for (match of lookupMatches(); track match.id) {
+            <button type="button" class="match" (click)="selectExisting(match)">
+              <span class="avatar">{{ initials(match) }}</span>
+              <span class="match__copy">
+                <strong>{{ match.fullName }}</strong>
+                <small>{{ match.email }}{{ match.phoneNo ? ' · ' + match.phoneNo : '' }}</small>
+              </span>
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          }
+        </div>
+        <button mat-button type="button" class="create-new" (click)="startNewVip()">
+          None of these — create a new VIP
+        </button>
+      </div>
+    }
+
+    @if (selectedExisting(); as existing) {
+      <div class="selected-vip span-2">
+        <span class="avatar">{{ initials(existing) }}</span>
+        <div class="selected-vip__copy">
+          <strong>{{ existing.fullName }}</strong>
+          <small>
+            Existing VIP · {{ existing.email }}
+            @if (existing.invitedByName) {
+              · Invited by {{ existing.invitedByName }}
+            }
+          </small>
+        </div>
+        <button mat-button type="button" (click)="startNewVip()">Not this person</button>
+      </div>
+    }
+
+    @if (createNew() && lookupMatches().length > 0) {
+      <p class="lookup-note span-2">
+        Creating a new VIP even though similar last names exist.
+        <button mat-button type="button" (click)="useExistingMatches()">Use an existing match</button>
+      </p>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Email address</mat-label>
+      <input matInput type="email" formControlName="email" autocomplete="off" />
+      @if (form.controls.email.touched && form.controls.email.hasError('required')) {
+        <mat-error>Email address is required.</mat-error>
+      } @else if (form.controls.email.touched && form.controls.email.hasError('email')) {
+        <mat-error>Enter a valid email address.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Phone number</mat-label>
+      <input matInput formControlName="phoneNo" autocomplete="off" placeholder="Optional" />
+      @if (form.controls.phoneNo.touched && form.controls.phoneNo.hasError('pattern')) {
+        <mat-error>Enter a valid phone number.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (!selectedExisting()) {
+      <mat-form-field appearance="outline" class="span-2">
+        <mat-label>Invited by</mat-label>
+        <mat-icon matPrefix>person_add_alt</mat-icon>
+        <input
+          matInput
+          [formControl]="inviterSearch"
+          [matAutocomplete]="inviterAuto"
+          autocomplete="off"
+          placeholder="Search a member, or leave blank"
+        />
+        @if (selectedInviter()) {
+          <button mat-icon-button matSuffix type="button" aria-label="Clear inviter" (click)="clearInviter()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+        <mat-autocomplete
+          #inviterAuto="matAutocomplete"
+          (optionSelected)="selectInviter($event)"
+        >
+          @for (inviter of inviterOptions(); track inviter.id) {
+            <mat-option [value]="inviter">
+              <span class="inviter-option">
+                <strong>{{ inviter.fullName }}</strong>
+                <small>{{ inviter.cellName ?? 'No cell' }}</small>
+              </span>
+            </mat-option>
+          }
+        </mat-autocomplete>
+        <mat-hint>Optional. Leave blank if the attendee came on their own.</mat-hint>
+      </mat-form-field>
+    }
+
+    @if (
+      !selectedExisting() &&
+      !lookupLoading() &&
+      form.controls.lastName.value.trim().length >= 2 &&
+      lookupMatches().length === 0
+    ) {
+      <p class="lookup-note span-2">
+        <mat-icon>person_add</mat-icon>
+        No existing VIP found — this will create a new VIP account.
+      </p>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <span class="action-note">VIPs receive a QR pass automatically.</span>
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="submit()"
+    [disabled]="submitDisabled()"
+  >
+    @if (saving()) {
+      <mat-spinner diameter="18" />
+    } @else {
+      {{ isExisting ? 'Check in existing VIP' : 'Add & check in' }}
+    }
+  </button>
+</mat-dialog-actions>

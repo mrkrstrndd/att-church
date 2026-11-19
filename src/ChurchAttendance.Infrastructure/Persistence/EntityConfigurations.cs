@@ -38,6 +38,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .IsRequired()
             .HasDefaultValueSql("replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '')");
         builder.Property(m => m.CellId).HasColumnName("cell_id");
+        builder.Property(m => m.InvitedByMemberId).HasColumnName("invited_by_member_id");
         builder.Property(m => m.IsActive).HasColumnName("is_active").HasDefaultValue(true);
         builder.Property(m => m.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("now()");
         builder.Property(m => m.UpdatedAt).HasColumnName("updated_at").HasDefaultValueSql("now()");
@@ -46,11 +47,17 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.HasIndex(m => m.Email).IsUnique();
         builder.HasIndex(m => m.QrToken).IsUnique();
         builder.HasIndex(m => m.CellId).HasDatabaseName("ix_members_cell_id");
+        builder.HasIndex(m => m.InvitedByMemberId).HasDatabaseName("ix_members_invited_by");
         builder.HasIndex(m => new { m.LastName, m.FirstName }).HasDatabaseName("ix_members_last_name");
 
         builder.HasOne(m => m.Cell)
             .WithMany(c => c.Members)
             .HasForeignKey(m => m.CellId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(m => m.InvitedBy)
+            .WithMany(m => m.Invitees)
+            .HasForeignKey(m => m.InvitedByMemberId)
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(m => m.User)

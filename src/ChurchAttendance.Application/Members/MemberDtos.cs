@@ -12,9 +12,22 @@ public record MemberDto(
     IReadOnlyList<string> Roles,
     bool HasLogin,
     bool IsActive,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    Guid? InvitedByMemberId,
+    string? InvitedByName);
 
 public record MemberQrCodeDto(Guid MemberId, string MemberName, string Payload);
+
+public record VipLookupDto(
+    Guid Id,
+    string FirstName,
+    string LastName,
+    string FullName,
+    string Email,
+    string? PhoneNo,
+    string? InvitedByName);
+
+public record InviterOptionDto(Guid Id, string FullName, string? CellName);
 
 public record CreateLoginRequest(string? Username, string? Password);
 

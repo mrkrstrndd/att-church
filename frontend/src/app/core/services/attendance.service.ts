@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE } from '../api';
-import { AttendanceDay, CheckInResult, ScanCheckInResult } from '../models/attendance.model';
+import { AttendanceDay, CheckInResult, CreateVipCheckInPayload, ScanCheckInResult, VipCheckInResult } from '../models/attendance.model';
 
 @Injectable({ providedIn: 'root' })
 export class AttendanceService {
@@ -27,6 +27,17 @@ export class AttendanceService {
     return this.http.post<ScanCheckInResult>(
       `${API_BASE}/events/${eventId}/days/${dayId}/attendance/scan`,
       { qrCode }
+    );
+  }
+
+  createVipCheckIn(
+    eventId: string,
+    dayId: string,
+    payload: CreateVipCheckInPayload
+  ): Observable<VipCheckInResult> {
+    return this.http.post<VipCheckInResult>(
+      `${API_BASE}/events/${eventId}/days/${dayId}/attendance/vip`,
+      payload
     );
   }
 
