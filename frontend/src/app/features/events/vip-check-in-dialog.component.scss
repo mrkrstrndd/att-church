@@ -33,9 +33,9 @@ mat-dialog-content {
   align-items: flex-start;
   margin-bottom: 0.9rem;
   padding: 0.65rem 0.75rem;
-  border: 1px solid rgba(181, 138, 74, 0.22);
+  border: 1px solid rgba(232, 117, 26, 0.22);
   border-radius: 0.65rem;
-  background: rgba(181, 138, 74, 0.07);
+  background: rgba(232, 117, 26, 0.07);
 }
 
 .vip-intro mat-icon {
@@ -89,9 +89,9 @@ mat-dialog-content {
 
 .lookup-panel {
   padding: 0.7rem;
-  border: 1px solid rgba(60, 101, 136, 0.18);
+  border: 1px solid rgba(232, 117, 26, 0.18);
   border-radius: 0.65rem;
-  background: rgba(60, 101, 136, 0.045);
+  background: rgba(232, 117, 26, 0.045);
 }
 
 .lookup-panel__title {
@@ -99,7 +99,7 @@ mat-dialog-content {
   gap: 0.35rem;
   align-items: center;
   margin: 0 0 0.5rem;
-  color: #3c6588;
+  color: #b9510c;
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -122,7 +122,7 @@ mat-dialog-content {
   gap: 0.55rem;
   align-items: center;
   padding: 0.45rem 0.55rem;
-  border: 1px solid rgba(20, 43, 47, 0.09);
+  border: 1px solid rgba(78, 44, 24, 0.09);
   border-radius: 0.5rem;
   background: #fff;
   text-align: left;
@@ -131,8 +131,8 @@ mat-dialog-content {
 }
 
 .match:hover {
-  border-color: rgba(60, 101, 136, 0.4);
-  background: rgba(60, 101, 136, 0.04);
+  border-color: rgba(232, 117, 26, 0.4);
+  background: rgba(232, 117, 26, 0.04);
 }
 
 .match > mat-icon {
@@ -150,8 +150,8 @@ mat-dialog-content {
   height: 2rem;
   place-items: center;
   border-radius: 50%;
-  background: rgba(60, 101, 136, 0.1);
-  color: #3c6588;
+  background: rgba(232, 117, 26, 0.1);
+  color: #b9510c;
   font-size: 0.62rem;
   font-weight: 800;
 }

@@ -16,7 +16,7 @@ public class ChurchSettings
 {
     public const string SectionName = "Church";
 
-    public string Name { get; set; } = "Grace Community Church";
+    public string Name { get; set; } = "Identity Church";
     public string TimeZoneId { get; set; } = "Asia/Manila";
     public int DefaultPageSize { get; set; } = 20;
     public int MaxPageSize { get; set; } = 100;

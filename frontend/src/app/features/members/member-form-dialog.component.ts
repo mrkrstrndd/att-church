@@ -236,18 +236,18 @@ export class MemberFormDialogComponent {
         <head>
           <title>${escapeHtml(member.fullName)} — Attendance QR</title>
           <style>
-            body { margin: 0; padding: 48px; font-family: Arial, sans-serif; color: #142b2f; text-align: center; }
-            .card { max-width: 420px; margin: 0 auto; padding: 32px; border: 1px solid #d9d2c2; border-radius: 18px; }
+            body { margin: 0; padding: 48px; font-family: Arial, sans-serif; color: #2f1a10; text-align: center; }
+            .card { max-width: 420px; margin: 0 auto; padding: 32px; border: 1px solid #ffd9b8; border-radius: 18px; }
             img { width: 320px; height: 320px; image-rendering: pixelated; }
             h1 { margin: 0 0 6px; font-size: 24px; }
-            p { margin: 8px 0 20px; color: #74807c; font-size: 13px; }
-            small { display: block; margin-top: 18px; color: #9b763a; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; }
+            p { margin: 8px 0 20px; color: #8b7163; font-size: 13px; }
+            small { display: block; margin-top: 18px; color: #b9510c; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; }
           </style>
         </head>
         <body>
           <div class="card">
             <h1>${escapeHtml(member.fullName)}</h1>
-            <p>Church attendance QR pass</p>
+            <p>Identity Church · Attendance QR pass</p>
             <img src="${image}" alt="Member QR code" />
             <small>Present this code at check-in</small>
           </div>
@@ -331,7 +331,7 @@ export class MemberFormDialogComponent {
       margin: 2,
       color: {
         dark: '#142b2f',
-        light: '#fffdf8'
+        light: '#ffffff'
       }
     });
     this.qrImage.set(image);

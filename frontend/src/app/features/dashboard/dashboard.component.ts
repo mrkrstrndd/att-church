@@ -12,9 +12,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
-import { PageHeaderComponent } from '../../shared/page-header.component';
 import { EmptyStateComponent } from '../../shared/empty-state.component';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   AttendanceByCell,
   DashboardKpis,
@@ -47,7 +47,6 @@ interface KpiCard {
     MatProgressBarModule,
     MatSnackBarModule,
     NgxEchartsDirective,
-    PageHeaderComponent,
     EmptyStateComponent
   ],
   templateUrl: './dashboard.component.html',
@@ -57,6 +56,9 @@ export class DashboardComponent implements OnInit {
   private readonly dashboard = inject(DashboardService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly auth = inject(AuthService);
+
+  readonly firstName = computed(() => this.auth.user()?.firstName?.trim() || 'friend');
 
   readonly loading = signal(true);
   readonly kpis = signal<DashboardKpis | null>(null);
@@ -77,7 +79,7 @@ export class DashboardComponent implements OnInit {
         label: 'Active members',
         value: kpi ? `${kpi.totalActiveMembers}` : '—',
         icon: 'groups',
-        tone: 'teal',
+        tone: 'orange',
         note: 'Members currently walking with us',
         delta: null
       },
@@ -85,7 +87,7 @@ export class DashboardComponent implements OnInit {
         label: 'Cells',
         value: kpi ? `${kpi.totalCells}` : '—',
         icon: 'hub',
-        tone: 'gold',
+        tone: 'amber',
         note: 'Small groups caring for one another',
         delta: null
       },
@@ -93,7 +95,7 @@ export class DashboardComponent implements OnInit {
         label: 'Events this month',
         value: kpi ? `${kpi.eventsThisMonth}` : '—',
         icon: 'event',
-        tone: 'blue',
+        tone: 'terracotta',
         note: 'Scheduled gatherings',
         delta: kpi?.eventsThisMonthDeltaPercent ?? null
       },
@@ -101,7 +103,7 @@ export class DashboardComponent implements OnInit {
         label: 'Last event attendance',
         value: kpi ? `${kpi.lastEvent?.attendance ?? 0}` : '—',
         icon: 'how_to_reg',
-        tone: 'violet',
+        tone: 'clay',
         note: kpi?.lastEvent ? `${kpi.lastEvent.name} · ${formatDate(kpi.lastEvent.date)}` : 'No event recorded yet',
         delta: null
       },
@@ -109,7 +111,7 @@ export class DashboardComponent implements OnInit {
         label: 'Average attendance',
         value: kpi ? `${kpi.averageAttendance.toFixed(1)}` : '—',
         icon: 'insights',
-        tone: 'green',
+        tone: 'apricot',
         note: 'Average per event day in range',
         delta: kpi?.averageAttendanceDeltaPercent ?? null
       },
@@ -133,15 +135,15 @@ export class DashboardComponent implements OnInit {
         type: 'category',
         boundaryGap: false,
         data: points.map((point) => point.label),
-        axisLine: { lineStyle: { color: '#d9d2c2' } },
-        axisLabel: { color: '#74807c', fontSize: 11 },
+        axisLine: { lineStyle: { color: '#ead7c8' } },
+        axisLabel: { color: '#8b7163', fontSize: 11 },
         axisTick: { show: false }
       },
       yAxis: {
         type: 'value',
         minInterval: 1,
-        splitLine: { lineStyle: { color: 'rgba(20,43,47,0.07)' } },
-        axisLabel: { color: '#74807c', fontSize: 11 }
+        splitLine: { lineStyle: { color: 'rgba(91,53,34,0.08)' } },
+        axisLabel: { color: '#8b7163', fontSize: 11 }
       },
       series: [
         {
@@ -151,8 +153,8 @@ export class DashboardComponent implements OnInit {
           symbol: 'circle',
           symbolSize: 7,
           data: points.map((point) => point.totalAttendance),
-          lineStyle: { width: 3, color: '#1f5554' },
-          itemStyle: { color: '#1f5554', borderColor: '#fffdf8', borderWidth: 2 },
+          lineStyle: { width: 3, color: '#e8751a' },
+          itemStyle: { color: '#e8751a', borderColor: '#ffffff', borderWidth: 2 },
           areaStyle: {
             color: {
               type: 'linear',
@@ -161,8 +163,8 @@ export class DashboardComponent implements OnInit {
               x2: 0,
               y2: 1,
               colorStops: [
-                { offset: 0, color: 'rgba(31,85,84,0.28)' },
-                { offset: 1, color: 'rgba(31,85,84,0.01)' }
+                { offset: 0, color: 'rgba(232,117,26,0.3)' },
+                { offset: 1, color: 'rgba(232,117,26,0.01)' }
               ]
             }
           }
@@ -179,15 +181,15 @@ export class DashboardComponent implements OnInit {
       xAxis: {
         type: 'value',
         minInterval: 1,
-        splitLine: { lineStyle: { color: 'rgba(20,43,47,0.07)' } },
-        axisLabel: { color: '#74807c', fontSize: 11 }
+        splitLine: { lineStyle: { color: 'rgba(91,53,34,0.08)' } },
+        axisLabel: { color: '#8b7163', fontSize: 11 }
       },
       yAxis: {
         type: 'category',
         data: cells.map((cell) => cell.name),
         axisLine: { show: false },
         axisTick: { show: false },
-        axisLabel: { color: '#41514e', fontSize: 11 }
+        axisLabel: { color: '#5d4031', fontSize: 11 }
       },
       series: [
         {
@@ -204,12 +206,12 @@ export class DashboardComponent implements OnInit {
               x2: 1,
               y2: 0,
               colorStops: [
-                { offset: 0, color: '#b58a4a' },
-                { offset: 1, color: '#dfc48f' }
+                { offset: 0, color: '#f6ad72' },
+                { offset: 1, color: '#e8751a' }
               ]
             }
           },
-          label: { show: true, position: 'right', color: '#41514e', fontSize: 11 }
+          label: { show: true, position: 'right', color: '#5d4031', fontSize: 11 }
         }
       ]
     };
@@ -224,20 +226,20 @@ export class DashboardComponent implements OnInit {
         top: 0,
         right: 0,
         icon: 'roundRect',
-        textStyle: { color: '#74807c', fontSize: 11 }
+        textStyle: { color: '#8b7163', fontSize: 11 }
       },
       xAxis: {
         type: 'category',
         data: monthly?.labels ?? [],
-        axisLine: { lineStyle: { color: '#d9d2c2' } },
+        axisLine: { lineStyle: { color: '#ead7c8' } },
         axisTick: { show: false },
-        axisLabel: { color: '#74807c', fontSize: 11 }
+        axisLabel: { color: '#8b7163', fontSize: 11 }
       },
       yAxis: {
         type: 'value',
         minInterval: 1,
-        splitLine: { lineStyle: { color: 'rgba(20,43,47,0.07)' } },
-        axisLabel: { color: '#74807c', fontSize: 11 }
+        splitLine: { lineStyle: { color: 'rgba(91,53,34,0.08)' } },
+        axisLabel: { color: '#8b7163', fontSize: 11 }
       },
       series: [
         {
@@ -245,7 +247,7 @@ export class DashboardComponent implements OnInit {
           type: 'bar',
           barMaxWidth: 22,
           data: monthly?.totalAttendance ?? [],
-          itemStyle: { color: '#1f5554', borderRadius: [6, 6, 0, 0] }
+          itemStyle: { color: '#e8751a', borderRadius: [6, 6, 0, 0] }
         },
         {
           name: 'Unique attendees',
@@ -254,8 +256,8 @@ export class DashboardComponent implements OnInit {
           symbol: 'circle',
           symbolSize: 6,
           data: monthly?.uniqueAttendees ?? [],
-          lineStyle: { color: '#b58a4a', width: 2 },
-          itemStyle: { color: '#b58a4a' }
+          lineStyle: { color: '#b9510c', width: 2 },
+          itemStyle: { color: '#b9510c' }
         }
       ]
     };

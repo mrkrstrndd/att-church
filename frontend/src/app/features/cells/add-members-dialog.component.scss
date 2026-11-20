@@ -23,9 +23,9 @@
 .member-list {
   max-height: 330px;
   overflow-y: auto;
-  border: 1px solid rgba(20, 43, 47, 0.08);
+  border: 1px solid rgba(78, 44, 24, 0.08);
   border-radius: 0.8rem;
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 mat-selection-list {
@@ -33,7 +33,7 @@ mat-selection-list {
 }
 
 mat-list-option {
-  border-bottom: 1px solid rgba(20, 43, 47, 0.06);
+  border-bottom: 1px solid rgba(78, 44, 24, 0.06);
 }
 
 mat-list-option:last-child {

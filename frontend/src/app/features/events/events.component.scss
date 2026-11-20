@@ -9,10 +9,10 @@
 
 .table-card {
   overflow: hidden;
-  border: 1px solid rgba(20, 43, 47, 0.07);
+  border: 1px solid rgba(78, 44, 24, 0.07);
   border-radius: 1rem;
   background: rgba(255, 253, 248, 0.9);
-  box-shadow: 0 14px 40px rgba(20, 43, 47, 0.05);
+  box-shadow: 0 14px 40px rgba(78, 44, 24, 0.05);
 }
 
 .table-wrap {
@@ -47,7 +47,7 @@ th.mat-mdc-header-cell {
   height: 2.4rem;
   border-radius: 0.7rem;
   background: var(--church-ink);
-  color: #d8ba80;
+  color: #ffd9b8;
   place-items: center;
 }
 
@@ -81,16 +81,16 @@ th.mat-mdc-header-cell {
   display: inline-flex;
   padding: 0.18rem 0.48rem;
   border-radius: 999px;
-  background: rgba(60, 101, 136, 0.1);
-  color: #3c6588;
+  background: rgba(232, 117, 26, 0.1);
+  color: #b9510c;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.03em;
 }
 
 .type-badge--multi {
-  background: rgba(181, 138, 74, 0.14);
-  color: #8f692f;
+  background: rgba(232, 117, 26, 0.14);
+  color: #a94b0a;
 }
 
 .attendance-cell {

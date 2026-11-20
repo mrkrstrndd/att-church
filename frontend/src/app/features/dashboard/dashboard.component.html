@@ -1,28 +1,54 @@
-<app-page-header
-  eyebrow="Church pulse"
-  title="Dashboard"
-  subtitle="A clear view of how the congregation is gathering, caring, and growing."
->
-  <form [formGroup]="rangeForm" class="range" (ngSubmit)="applyRange()">
-    <mat-form-field appearance="outline" class="range__field">
-      <mat-label>From</mat-label>
-      <input matInput [matDatepicker]="fromPicker" formControlName="from" />
-      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
-      <mat-datepicker #fromPicker />
-    </mat-form-field>
+<section class="brand-hero">
+  <div class="brand-hero__glow"></div>
+  <img
+    class="brand-hero__watermark"
+    src="identity-church-mark-white.png"
+    alt=""
+    aria-hidden="true"
+  />
 
-    <span class="range__dash">to</span>
+  <div class="brand-hero__copy">
+    <div class="brand-hero__brand">
+      <span class="brand-hero__mark">
+        <img src="identity-church-mark-white.png" alt="Identity Church logo" />
+      </span>
+      <span class="brand-hero__church">
+        <strong>Identity Church</strong>
+        <small>Church Attendance</small>
+      </span>
+    </div>
 
-    <mat-form-field appearance="outline" class="range__field">
-      <mat-label>To</mat-label>
-      <input matInput [matDatepicker]="toPicker" formControlName="to" />
-      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
-      <mat-datepicker #toPicker />
-    </mat-form-field>
+    <p class="brand-hero__eyebrow">Church pulse</p>
+    <h1>Welcome back, {{ firstName() }}.</h1>
+    <p class="brand-hero__lead">
+      Every gathering tells a story. Here is how your church family is gathering, caring, and growing.
+    </p>
+  </div>
 
-    <button mat-flat-button color="primary" type="submit" class="range__apply">Apply</button>
-  </form>
-</app-page-header>
+  <div class="brand-hero__controls">
+    <p class="brand-hero__control-label">Viewing period</p>
+    <form [formGroup]="rangeForm" class="range" (ngSubmit)="applyRange()">
+      <mat-form-field appearance="outline" class="range__field">
+        <mat-label>From</mat-label>
+        <input matInput [matDatepicker]="fromPicker" formControlName="from" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+
+      <span class="range__dash">to</span>
+
+      <mat-form-field appearance="outline" class="range__field">
+        <mat-label>To</mat-label>
+        <input matInput [matDatepicker]="toPicker" formControlName="to" />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" type="submit" class="range__apply">Apply</button>
+    </form>
+    <p class="brand-hero__control-note">Defaults to the last 90 days.</p>
+  </div>
+</section>
 
 @if (loading()) {
   <mat-progress-bar mode="indeterminate" class="loading-bar" />

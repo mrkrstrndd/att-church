@@ -42,9 +42,9 @@
   padding: 1.2rem;
   border-radius: 1rem;
   background:
-    radial-gradient(circle at 100% 0%, rgba(216, 186, 128, 0.2), transparent 16rem),
+    radial-gradient(circle at 100% 0%, rgba(255, 217, 184, 0.2), transparent 16rem),
     var(--church-ink);
-  color: #f8f2e6;
+  color: #fff8f2;
 }
 
 .leader-card__avatar {
@@ -52,10 +52,10 @@
   flex: 0 0 3.2rem;
   width: 3.2rem;
   height: 3.2rem;
-  border: 1px solid rgba(216, 186, 128, 0.3);
+  border: 1px solid rgba(255, 217, 184, 0.3);
   border-radius: 1rem;
-  background: rgba(216, 186, 128, 0.12);
-  color: #d8ba80;
+  background: rgba(255, 217, 184, 0.12);
+  color: #ffd9b8;
   font-family: var(--church-display);
   font-size: 1.2rem;
   font-weight: 700;
@@ -64,7 +64,7 @@
 
 .leader-card__copy .eyebrow {
   margin: 0 0 0.2rem;
-  color: #d8ba80;
+  color: #ffd9b8;
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -80,7 +80,7 @@
 
 .leader-card__copy p:last-child {
   margin: 0.25rem 0 0;
-  color: rgba(248, 242, 230, 0.55);
+  color: rgba(255, 248, 242, 0.55);
   font-size: 0.7rem;
 }
 
@@ -90,9 +90,9 @@
   gap: 0.2rem;
   margin-left: auto;
   padding: 0.25rem 0.5rem;
-  border: 1px solid rgba(216, 186, 128, 0.25);
+  border: 1px solid rgba(255, 217, 184, 0.25);
   border-radius: 999px;
-  color: #d8ba80;
+  color: #ffd9b8;
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -109,7 +109,7 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 1rem;
-  border: 1px solid rgba(20, 43, 47, 0.07);
+  border: 1px solid rgba(78, 44, 24, 0.07);
   border-radius: 1rem;
   background: rgba(255, 253, 248, 0.88);
 }
@@ -119,14 +119,14 @@
   width: 2.2rem;
   height: 2.2rem;
   border-radius: 0.65rem;
-  background: rgba(31, 85, 84, 0.1);
-  color: #1f5554;
+  background: rgba(232, 117, 26, 0.1);
+  color: #b9510c;
   place-items: center;
 }
 
 .stat-card__icon--gold {
-  background: rgba(181, 138, 74, 0.12);
-  color: #b58a4a;
+  background: rgba(232, 117, 26, 0.12);
+  color: #e8751a;
 }
 
 .stat-card strong {
@@ -150,10 +150,10 @@
 
 .table-card {
   overflow: hidden;
-  border: 1px solid rgba(20, 43, 47, 0.07);
+  border: 1px solid rgba(78, 44, 24, 0.07);
   border-radius: 1rem;
   background: rgba(255, 253, 248, 0.9);
-  box-shadow: 0 14px 40px rgba(20, 43, 47, 0.05);
+  box-shadow: 0 14px 40px rgba(78, 44, 24, 0.05);
 }
 
 .table-head {
@@ -161,7 +161,7 @@
   align-items: flex-start;
   justify-content: space-between;
   padding: 1.1rem 1.2rem;
-  border-bottom: 1px solid rgba(20, 43, 47, 0.06);
+  border-bottom: 1px solid rgba(78, 44, 24, 0.06);
 }
 
 .table-head h2 {
@@ -230,8 +230,8 @@ th.mat-mdc-header-cell {
 .mini-badge {
   padding: 0.12rem 0.4rem;
   border-radius: 999px;
-  background: rgba(181, 138, 74, 0.12);
-  color: #8f692f;
+  background: rgba(232, 117, 26, 0.12);
+  color: #a94b0a;
   font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -253,23 +253,23 @@ th.mat-mdc-header-cell {
 }
 
 .role-chip--member {
-  background: rgba(60, 101, 136, 0.1);
-  color: #3c6588;
+  background: rgba(232, 117, 26, 0.1);
+  color: #b9510c;
 }
 
 .role-chip--vip {
-  background: rgba(198, 163, 102, 0.2);
-  color: #7a541e;
+  background: rgba(214, 158, 61, 0.18);
+  color: #7f5712;
 }
 
 .role-chip--cellleader {
-  background: rgba(181, 138, 74, 0.15);
-  color: #8f692f;
+  background: rgba(151, 62, 35, 0.13);
+  color: #8e3a20;
 }
 
 .role-chip--admin {
-  background: rgba(106, 90, 142, 0.12);
-  color: #6a5a8e;
+  background: rgba(72, 45, 31, 0.12);
+  color: #5b3522;
 }
 
 .muted {

@@ -5,7 +5,7 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
+        primary: mat.$orange-palette,
         tertiary: mat.$orange-palette
       ),
       typography: (
@@ -18,28 +18,32 @@ html {
 }
 
 :root {
-  --mat-sys-primary: #1f5554;
-  --mat-sys-on-primary: #fffdf8;
-  --mat-sys-primary-container: #cfe6e2;
-  --mat-sys-on-primary-container: #0b2f2e;
-  --mat-sys-primary-fixed: #cfe6e2;
-  --mat-sys-primary-fixed-dim: #9fd0c9;
-  --mat-sys-on-primary-fixed: #041c1b;
-  --mat-sys-on-primary-fixed-variant: #1f5554;
-  --mat-sys-inverse-primary: #9fd0c9;
-  --mat-sys-tertiary: #9b763a;
-  --mat-sys-on-tertiary: #fffdf8;
-  --mat-sys-tertiary-container: #f1e3c8;
-  --mat-sys-on-tertiary-container: #3d2c0c;
-  --church-ink: #142b2f;
-  --church-ink-soft: #244449;
-  --church-cream: #f7f3ea;
-  --church-paper: #fffdf8;
-  --church-sand: #efe7d6;
-  --church-gold: #c6a366;
-  --church-gold-dark: #9b763a;
-  --church-muted: #74807c;
-  --church-line: rgba(20, 43, 47, 0.08);
+  --mat-sys-primary: #e8751a;
+  --mat-sys-on-primary: #fffaf6;
+  --mat-sys-primary-container: #ffe3cf;
+  --mat-sys-on-primary-container: #4a1d04;
+  --mat-sys-primary-fixed: #ffe3cf;
+  --mat-sys-primary-fixed-dim: #ffc59b;
+  --mat-sys-on-primary-fixed: #2a0f02;
+  --mat-sys-on-primary-fixed-variant: #8a3c08;
+  --mat-sys-inverse-primary: #ffb27c;
+  --mat-sys-tertiary: #b9510c;
+  --mat-sys-on-tertiary: #fffaf6;
+  --mat-sys-tertiary-container: #ffe4cd;
+  --mat-sys-on-tertiary-container: #3d1a04;
+  --church-orange: #e8751a;
+  --church-orange-deep: #b94e0b;
+  --church-orange-soft: #ffe3d0;
+  --church-peach: #fff1e6;
+  --church-ink: #2f1a10;
+  --church-ink-soft: #4a2c1b;
+  --church-cream: #fff8f2;
+  --church-paper: #ffffff;
+  --church-sand: #ffeadc;
+  --church-gold: #f29a4a;
+  --church-gold-dark: #b9510c;
+  --church-muted: #8b7163;
+  --church-line: rgba(78, 44, 24, 0.09);
   --church-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --church-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -85,6 +89,7 @@ a {
 
 .mat-icon {
   font-family: 'Material Icons Round' !important;
+  line-height: 1;
 }
 
 .mat-mdc-form-field {
@@ -101,6 +106,7 @@ a {
   width: 1.25rem;
   height: 1.25rem;
   font-size: 1.25rem;
+  line-height: 1.25rem;
 }
 
 .mat-mdc-dialog-surface {
@@ -124,7 +130,7 @@ a {
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(20, 43, 47, 0.22) transparent;
+  scrollbar-color: rgba(121, 63, 30, 0.22) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -134,7 +140,7 @@ a {
 
 *::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(20, 43, 47, 0.18);
+  background: rgba(121, 63, 30, 0.18);
 }
 
 *::-webkit-scrollbar-track {
@@ -149,11 +155,11 @@ a {
   color: var(--church-muted);
 }
 
-/* Dark sidebar: Material button tokens otherwise override the label color. */
+/* Orange sidebar navigation. */
 .sidebar .nav__item {
-  color: rgba(245, 240, 229, 0.68) !important;
-  --mat-button-text-label-text-color: rgba(245, 240, 229, 0.68);
-  --mat-button-text-state-layer-color: rgba(216, 186, 128, 0.14);
+  color: rgba(255, 250, 246, 0.78) !important;
+  --mat-button-text-label-text-color: rgba(255, 250, 246, 0.78);
+  --mat-button-text-state-layer-color: rgba(255, 255, 255, 0.14);
 }
 
 .sidebar .nav__item .mdc-button__label,
@@ -162,24 +168,24 @@ a {
 }
 
 .sidebar .nav__item mat-icon {
-  color: rgba(216, 186, 128, 0.62) !important;
+  color: rgba(255, 223, 199, 0.82) !important;
 }
 
 .sidebar .nav__item:hover,
 .sidebar .nav__item--active {
-  color: #fffaf0 !important;
-  --mat-button-text-label-text-color: #fffaf0;
+  color: #ffffff !important;
+  --mat-button-text-label-text-color: #ffffff;
 }
 
 .sidebar .nav__item--active mat-icon {
-  color: #d8ba80 !important;
+  color: #ffffff !important;
 }
 
 .sidebar .nav__item--muted {
-  color: rgba(245, 240, 229, 0.5) !important;
-  --mat-button-text-label-text-color: rgba(245, 240, 229, 0.5);
+  color: rgba(255, 250, 246, 0.58) !important;
+  --mat-button-text-label-text-color: rgba(255, 250, 246, 0.58);
 }
 
 ::selection {
-  background: rgba(198, 163, 102, 0.35);
+  background: rgba(232, 117, 26, 0.28);
 }

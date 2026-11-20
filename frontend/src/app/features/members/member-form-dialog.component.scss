@@ -15,7 +15,7 @@
 
 .section {
   padding: 1rem;
-  border: 1px solid rgba(20, 43, 47, 0.08);
+  border: 1px solid rgba(78, 44, 24, 0.08);
   border-radius: 0.9rem;
   background: rgba(247, 243, 234, 0.55);
 }
@@ -27,8 +27,8 @@
   margin-top: -0.15rem;
   padding: 0.45rem 0.65rem;
   border-radius: 0.55rem;
-  background: rgba(181, 138, 74, 0.08);
-  color: #7a541e;
+  background: rgba(232, 117, 26, 0.08);
+  color: #8a4b0e;
   font-size: 0.7rem;
 }
 
@@ -43,11 +43,11 @@
   grid-template-columns: auto minmax(0, 1fr);
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid rgba(31, 85, 84, 0.14);
+  border: 1px solid rgba(232, 117, 26, 0.14);
   border-radius: 0.9rem;
   background:
-    radial-gradient(circle at 100% 0%, rgba(198, 163, 102, 0.14), transparent 14rem),
-    rgba(31, 85, 84, 0.035);
+    radial-gradient(circle at 100% 0%, rgba(242, 154, 74, 0.14), transparent 14rem),
+    rgba(232, 117, 26, 0.035);
 }
 
 .qr-panel__preview {
@@ -55,7 +55,7 @@
   width: 9.5rem;
   height: 9.5rem;
   overflow: hidden;
-  border: 1px solid rgba(20, 43, 47, 0.1);
+  border: 1px solid rgba(78, 44, 24, 0.1);
   border-radius: 0.8rem;
   background: var(--church-paper);
   place-items: center;
@@ -159,9 +159,9 @@
 .role-grid mat-checkbox {
   align-items: flex-start;
   padding: 0.65rem;
-  border: 1px solid rgba(20, 43, 47, 0.07);
+  border: 1px solid rgba(78, 44, 24, 0.07);
   border-radius: 0.7rem;
-  background: #fffdf8;
+  background: #ffffff;
 }
 
 .role-name {
@@ -197,7 +197,7 @@
   gap: 0.85rem;
   margin-top: 0.8rem;
   padding-top: 0.8rem;
-  border-top: 1px dashed rgba(20, 43, 47, 0.12);
+  border-top: 1px dashed rgba(78, 44, 24, 0.12);
 }
 
 .password-hint {

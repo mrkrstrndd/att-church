@@ -35,10 +35,10 @@
 
 .table-card {
   overflow: hidden;
-  border: 1px solid rgba(20, 43, 47, 0.07);
+  border: 1px solid rgba(78, 44, 24, 0.07);
   border-radius: 1rem;
   background: rgba(255, 253, 248, 0.9);
-  box-shadow: 0 14px 40px rgba(20, 43, 47, 0.05);
+  box-shadow: 0 14px 40px rgba(78, 44, 24, 0.05);
 }
 
 .table-wrap {
@@ -60,7 +60,7 @@ th.mat-mdc-header-cell {
 }
 
 td.mat-mdc-cell {
-  border-bottom-color: rgba(20, 43, 47, 0.06);
+  border-bottom-color: rgba(78, 44, 24, 0.06);
 }
 
 .person {
@@ -115,23 +115,23 @@ td.mat-mdc-cell {
 }
 
 .role-chip--member {
-  background: rgba(60, 101, 136, 0.1);
-  color: #3c6588;
+  background: rgba(232, 117, 26, 0.1);
+  color: #b9510c;
 }
 
 .role-chip--vip {
-  background: rgba(198, 163, 102, 0.2);
-  color: #7a541e;
+  background: rgba(214, 158, 61, 0.18);
+  color: #7f5712;
 }
 
 .role-chip--cellleader {
-  background: rgba(181, 138, 74, 0.15);
-  color: #8f692f;
+  background: rgba(151, 62, 35, 0.13);
+  color: #8e3a20;
 }
 
 .role-chip--admin {
-  background: rgba(106, 90, 142, 0.12);
-  color: #6a5a8e;
+  background: rgba(72, 45, 31, 0.12);
+  color: #5b3522;
 }
 
 .cell-pill,

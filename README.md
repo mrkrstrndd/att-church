@@ -1,6 +1,6 @@
-# Church Attendance System
+# Identity Church Attendance
 
-A full-stack church attendance platform: member directory, cells (small groups), single- and multi-day events, day-by-day attendance check-in, and a leadership dashboard.
+A full-stack attendance platform for **Identity Church**: member directory, cells (small groups), single- and multi-day events, day-by-day attendance check-in, and a leadership dashboard.
 
 Built from the supplied technical specification with **ASP.NET Core 8**, **PostgreSQL**, **Entity Framework Core**, and **Angular 20** (standalone components + signals).
 
