@@ -26,11 +26,17 @@ public class EventsController : ControllerBase
         [FromQuery] DateOnly? to,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
+        [FromQuery] string? month = null,
         CancellationToken ct = default)
     {
-        var result = await _events.GetPagedAsync(new EventQuery(from, to, page, pageSize), ct);
+        var result = await _events.GetPagedAsync(new EventQuery(from, to, page, pageSize, month), ct);
         return Ok(result);
     }
+
+    [HttpGet("months")]
+    [ProducesResponseType(typeof(IReadOnlyList<EventMonthDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<EventMonthDto>>> GetMonths(CancellationToken ct) =>
+        Ok(await _events.GetMonthsAsync(ct));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(EventDto), StatusCodes.Status200OK)]

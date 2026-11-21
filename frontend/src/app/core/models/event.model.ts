@@ -1,3 +1,8 @@
+export interface EventMonth {
+  month: string;
+  eventCount: number;
+}
+
 export interface EventDay {
   id: string;
   eventDate: string;

@@ -36,8 +36,11 @@ public record UpdateEventRequest(
     DateOnly? StartDate,
     DateOnly? EndDate);
 
+public record EventMonthDto(string Month, int EventCount);
+
 public record EventQuery(
     DateOnly? From = null,
     DateOnly? To = null,
     int Page = 1,
-    int PageSize = 20);
+    int PageSize = 20,
+    string? Month = null);

@@ -15,79 +15,116 @@
   <mat-progress-bar mode="indeterminate" class="loading-bar" />
 }
 
+<section class="events-tools">
+  <mat-form-field appearance="outline" class="month-filter">
+    <mat-label>Month</mat-label>
+    <mat-icon matPrefix>calendar_month</mat-icon>
+    <mat-select [value]="selectedMonth()" (selectionChange)="onMonthChange($event.value)">
+      <mat-option value="">All months</mat-option>
+      @for (month of months(); track month.month) {
+        <mat-option [value]="month.month">
+          {{ monthLabel(month.month) }} · {{ month.eventCount }}
+        </mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <p class="events-note">
+    <strong>{{ total() }}</strong> {{ total() === 1 ? 'event' : 'events' }}
+    @if (selectedMonth()) {
+      in {{ monthLabel(selectedMonth()) }}
+    } @else {
+      across all months
+    }
+    · grouped by start month
+  </p>
+</section>
+
 <section class="table-card">
-  @if (events().length > 0) {
-    <div class="table-wrap">
-      <table mat-table [dataSource]="events()" class="event-table">
-        <ng-container matColumnDef="event">
-          <th mat-header-cell *matHeaderCellDef>Event</th>
-          <td mat-cell *matCellDef="let event">
-            <div class="event-name">
-              <span class="event-mark"><mat-icon>event</mat-icon></span>
-              <div>
-                <strong>{{ event.name }}</strong>
-                <small>{{ event.description || 'Church gathering' }}</small>
-              </div>
-            </div>
-          </td>
-        </ng-container>
+  @if (groups().length > 0) {
+    @for (group of groups(); track group.key) {
+      <section class="month-group">
+        <header class="month-group__head">
+          <div>
+            <p class="month-group__eyebrow">Month</p>
+            <h2>{{ group.label }}</h2>
+          </div>
+          <span>{{ group.events.length }} {{ group.events.length === 1 ? 'event' : 'events' }}</span>
+        </header>
 
-        <ng-container matColumnDef="dates">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let event">
-            <span class="date-label">{{ dateLabel(event) }}</span>
-          </td>
-        </ng-container>
+        <div class="table-wrap">
+          <table mat-table [dataSource]="group.events" class="event-table">
+            <ng-container matColumnDef="event">
+              <th mat-header-cell *matHeaderCellDef>Event</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="event-name">
+                  <span class="event-mark"><mat-icon>event</mat-icon></span>
+                  <div>
+                    <strong>{{ event.name }}</strong>
+                    <small>{{ event.description || 'Church gathering' }}</small>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
 
-        <ng-container matColumnDef="type">
-          <th mat-header-cell *matHeaderCellDef class="hide-sm">Type</th>
-          <td mat-cell *matCellDef="let event" class="hide-sm">
-            <span class="type-badge" [class.type-badge--multi]="event.isMultiDay">
-              {{ event.isMultiDay ? 'Multi-day' : 'Single day' }}
-            </span>
-          </td>
-        </ng-container>
+            <ng-container matColumnDef="dates">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let event">
+                <span class="date-label">{{ dateLabel(event) }}</span>
+              </td>
+            </ng-container>
 
-        <ng-container matColumnDef="attendance">
-          <th mat-header-cell *matHeaderCellDef>Attendance</th>
-          <td mat-cell *matCellDef="let event">
-            <div class="attendance-cell">
-              <strong>{{ event.attendanceCount }}</strong>
-              <small>{{ event.dayCount }} {{ event.dayCount === 1 ? 'day' : 'days' }}</small>
-            </div>
-          </td>
-        </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef class="hide-sm">Type</th>
+              <td mat-cell *matCellDef="let event" class="hide-sm">
+                <span class="type-badge" [class.type-badge--multi]="event.isMultiDay">
+                  {{ event.isMultiDay ? 'Multi-day' : 'Single day' }}
+                </span>
+              </td>
+            </ng-container>
 
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="actions-col"></th>
-          <td mat-cell *matCellDef="let event" class="actions-col">
-            @if (canCheckIn()) {
-              <a mat-flat-button class="checkin-btn" [routerLink]="['/events', event.id, 'attendance']">
-                <mat-icon>how_to_reg</mat-icon>
-                Attendance
-              </a>
-            }
-            @if (auth.isAdmin()) {
-              <button mat-icon-button type="button" matTooltip="Edit event" (click)="editEvent(event)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                type="button"
-                matTooltip="Delete event"
-                class="danger"
-                (click)="deleteEvent(event)"
-              >
-                <mat-icon>delete_outline</mat-icon>
-              </button>
-            }
-          </td>
-        </ng-container>
+            <ng-container matColumnDef="attendance">
+              <th mat-header-cell *matHeaderCellDef>Attendance</th>
+              <td mat-cell *matCellDef="let event">
+                <div class="attendance-cell">
+                  <strong>{{ event.attendanceCount }}</strong>
+                  <small>{{ event.dayCount }} {{ event.dayCount === 1 ? 'day' : 'days' }}</small>
+                </div>
+              </td>
+            </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    </div>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef class="actions-col"></th>
+              <td mat-cell *matCellDef="let event" class="actions-col">
+                @if (canCheckIn()) {
+                  <a mat-flat-button class="checkin-btn" [routerLink]="['/events', event.id, 'attendance']">
+                    <mat-icon>how_to_reg</mat-icon>
+                    Attendance
+                  </a>
+                }
+                @if (auth.isAdmin()) {
+                  <button mat-icon-button type="button" matTooltip="Edit event" (click)="editEvent(event)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    mat-icon-button
+                    type="button"
+                    matTooltip="Delete event"
+                    class="danger"
+                    (click)="deleteEvent(event)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      </section>
+    }
 
     <mat-paginator
       [length]="total()"
@@ -100,8 +137,12 @@
   } @else if (!loading()) {
     <app-empty-state
       icon="event_busy"
-      title="No events yet"
-      message="Create a Sunday service, conference, or outreach to begin recording attendance."
+      [title]="selectedMonth() ? 'No events in this month' : 'No events yet'"
+      [message]="
+        selectedMonth()
+          ? 'Try another month or create an event for this period.'
+          : 'Create a Sunday service, conference, or outreach to begin recording attendance.'
+      "
     />
   }
 </section>

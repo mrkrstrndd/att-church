@@ -43,6 +43,47 @@ public class EventServiceTests
     }
 
     [Fact]
+    public async Task GetPagedAsync_FiltersByMonthAndListsMonthOptions()
+    {
+        await using var db = TestDb.Create();
+        var clock = new FixedChurchClock(new DateOnly(2026, 12, 10));
+        var service = new EventService(db, clock, TestDb.ChurchSettings());
+        var actor = TestDb.AdminActor();
+
+        await service.CreateAsync(
+            new CreateEventRequest("November Gathering", null, false, new DateOnly(2026, 11, 1), null),
+            actor);
+        await service.CreateAsync(
+            new CreateEventRequest("November Midweek", null, false, new DateOnly(2026, 11, 15), null),
+            actor);
+        await service.CreateAsync(
+            new CreateEventRequest("December Gathering", null, false, new DateOnly(2026, 12, 6), null),
+            actor);
+
+        var november = await service.GetPagedAsync(new EventQuery(Month: "2026-11"));
+        var months = await service.GetMonthsAsync();
+
+        Assert.Equal(2, november.TotalCount);
+        Assert.All(november.Items, item => Assert.Equal(11, item.StartDate.Month));
+        Assert.Equal(
+            new[] { "2026-12", "2026-11" },
+            months.Select(month => month.Month));
+        Assert.Equal(1, months[0].EventCount);
+        Assert.Equal(2, months[1].EventCount);
+    }
+
+    [Fact]
+    public async Task GetPagedAsync_RejectsInvalidMonth()
+    {
+        await using var db = TestDb.Create();
+        var clock = new FixedChurchClock(new DateOnly(2026, 12, 10));
+        var service = new EventService(db, clock, TestDb.ChurchSettings());
+
+        await Assert.ThrowsAsync<AppValidationException>(() =>
+            service.GetPagedAsync(new EventQuery(Month: "November")));
+    }
+
+    [Fact]
     public async Task UpdateAsync_RejectsRemovingDayWithAttendance()
     {
         await using var db = TestDb.Create();

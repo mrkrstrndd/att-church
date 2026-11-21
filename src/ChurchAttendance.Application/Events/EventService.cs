@@ -1,3 +1,4 @@
+using System.Globalization;
 using ChurchAttendance.Application.Common;
 using ChurchAttendance.Application.Configuration;
 using ChurchAttendance.Domain.Entities;
@@ -29,10 +30,20 @@ public class EventService
         var pageSize = Math.Clamp(query.PageSize <= 0 ? _settings.DefaultPageSize : query.PageSize, 1, _settings.MaxPageSize);
 
         var events = _db.Events.AsNoTracking().AsQueryable();
-        if (query.From is not null)
-            events = events.Where(e => e.EndDate >= query.From);
-        if (query.To is not null)
-            events = events.Where(e => e.StartDate <= query.To);
+
+        if (!string.IsNullOrWhiteSpace(query.Month))
+        {
+            var monthStart = ParseMonth(query.Month);
+            var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+            events = events.Where(e => e.StartDate >= monthStart && e.StartDate <= monthEnd);
+        }
+        else
+        {
+            if (query.From is not null)
+                events = events.Where(e => e.EndDate >= query.From);
+            if (query.To is not null)
+                events = events.Where(e => e.StartDate <= query.To);
+        }
 
         var total = await events.CountAsync(ct);
         var items = await events
@@ -52,6 +63,23 @@ public class EventService
             .ToListAsync(ct);
 
         return PagedResult<EventListItemDto>.Create(items, page, pageSize, total);
+    }
+
+    public async Task<IReadOnlyList<EventMonthDto>> GetMonthsAsync(CancellationToken ct = default)
+    {
+        var rows = await _db.Events
+            .AsNoTracking()
+            .GroupBy(e => new { e.StartDate.Year, e.StartDate.Month })
+            .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+            .OrderByDescending(row => row.Year)
+            .ThenByDescending(row => row.Month)
+            .ToListAsync(ct);
+
+        return rows
+            .Select(row => new EventMonthDto(
+                $"{row.Year:0000}-{row.Month:00}",
+                row.Count))
+            .ToList();
     }
 
     public async Task<EventDto> GetByIdAsync(Guid id, CancellationToken ct = default)
@@ -189,6 +217,21 @@ public class EventService
     {
         for (var date = start; date <= end; date = date.AddDays(1))
             yield return date;
+    }
+
+    private static DateOnly ParseMonth(string month)
+    {
+        if (!DateTime.TryParseExact(
+                $"{month.Trim()}-01",
+                "yyyy-MM-dd",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out var parsed))
+        {
+            throw new AppValidationException(nameof(month), "Month must use YYYY-MM format.");
+        }
+
+        return DateOnly.FromDateTime(parsed);
     }
 
     private static string Clean(string? value) => (value ?? string.Empty).Trim();

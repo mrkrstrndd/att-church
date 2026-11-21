@@ -11,7 +11,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 - **JWT authentication** with 15-minute access tokens, rotating hashed refresh tokens, "Remember me" (30 days), account lockout after five failed attempts, and forced first-login password change.
 - **Members** with multiple roles (`Member`, `VIP`, `CellLeader`, `Admin`), optional cell assignment, soft deletion, filtered/paged directory, and optional login-account creation. Creating login accounts is restricted to Admins.
 - **Cells** with exactly one validated `CellLeader`, no member cap, leader/member detail views, add/remove members, and soft deletion.
-- **Events** with a single-day/multi-day toggle, server-generated `event_days`, and protected date edits when attendance already exists.
+- **Events** with a single-day/multi-day toggle, server-generated `event_days`, a month filter with month-grouped lists, and protected date edits when attendance already exists.
 - **Attendance check-in** for Admins and Cell Leaders, with idempotent check-ins, per-day tabs, search, live counts, and undo.
 - **QR check-in**: every member has a unique QR pass, available from **Members → Edit member**, with download/print and rotation. Attendance pages include a camera QR scanner plus image-upload fallback.
 - **VIP check-in**: from **Events → Attendance**, Admins can add a walk-in VIP with an optional inviter. Last-name lookup reuses an existing VIP account; otherwise a VIP with no cell or login is created and checked in immediately.
@@ -202,7 +202,7 @@ All routes are under `/api`. Errors use RFC 7807 `ProblemDetails`. Lists default
 | Auth | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `POST /auth/change-password`, `GET /auth/me` |
 | Members | `GET /members`, `GET /members/{id}`, `POST /members`, `PUT /members/{id}`, `DELETE /members/{id}`, `GET /members/{id}/qr-code`, `POST /members/{id}/qr-code/rotate`, `GET /members/vip-lookup?lastName=`, `GET /members/inviter-options?search=` |
 | Cells | `GET /cells`, `GET /cells/{id}`, `POST /cells`, `PUT /cells/{id}`, `DELETE /cells/{id}`, `POST /cells/{id}/members`, `DELETE /cells/{id}/members/{memberId}` |
-| Events | `GET /events`, `GET /events/{id}`, `POST /events`, `PUT /events/{id}`, `DELETE /events/{id}?force=true` |
+| Events | `GET /events` (`from`, `to`, or `month=YYYY-MM`), `GET /events/months`, `GET /events/{id}`, `POST /events`, `PUT /events/{id}`, `DELETE /events/{id}?force=true` |
 | Attendance | `GET/POST /events/{eventId}/days/{dayId}/attendance`, `POST .../attendance/scan`, `POST .../attendance/vip`, `DELETE .../attendance/{memberId}` |
 | Dashboard | `/dashboard/kpis`, `/dashboard/weekly-trend`, `/dashboard/attendance-by-cell`, `/dashboard/monthly-comparison`, `/dashboard/recent-events` |
 
