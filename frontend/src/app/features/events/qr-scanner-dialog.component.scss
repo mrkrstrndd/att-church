@@ -44,10 +44,13 @@
 }
 
 .camera {
-  min-height: 250px;
+  display: block;
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
 }
 
-.camera video {
+.camera-frame video {
   width: 100% !important;
   height: 250px !important;
   object-fit: cover;
@@ -219,7 +222,7 @@
 @media (max-width: 600px) {
   .camera-frame,
   .camera,
-  .camera video {
+  .camera-frame video {
     min-height: 240px;
     height: 240px !important;
   }

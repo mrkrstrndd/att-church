@@ -10,7 +10,13 @@
   </div>
 
   <div class="camera-frame">
-    <div id="member-qr-scanner" class="camera"></div>
+    <video
+      #scannerVideo
+      id="member-qr-scanner"
+      class="camera"
+      muted
+      playsinline
+    ></video>
     @if (cameraState() === 'starting') {
       <div class="camera-overlay">
         <mat-spinner diameter="34" />

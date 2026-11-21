@@ -1,17 +1,19 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   inject,
   NgZone,
   OnDestroy,
   OnInit,
-  signal
+  signal,
+  ViewChild
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Html5Qrcode } from 'html5-qrcode';
+import QrScanner from 'qr-scanner';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EventService } from '../../core/services/event.service';
@@ -39,6 +41,8 @@ interface ScanFeedback {
   styleUrl: './qr-attendance.component.scss'
 })
 export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('scannerVideo') private videoRef?: ElementRef<HTMLVideoElement>;
+
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly eventsApi = inject(EventService);
@@ -60,7 +64,7 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly eventId = this.route.snapshot.queryParamMap.get('eventId') ?? '';
   private readonly dayId = this.route.snapshot.queryParamMap.get('dayId') ?? '';
-  private scanner: Html5Qrcode | null = null;
+  private scanner: QrScanner | null = null;
   private destroyed = false;
   private viewReady = false;
   private cameraStarted = false;
@@ -125,10 +129,11 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cameraState.set('paused');
 
     try {
-      const scanner = new Html5Qrcode('qr-attendance-camera', { verbose: false });
-      const decoded = await scanner.scanFile(file, true);
-      scanner.clear();
-      this.handleDecoded(decoded);
+      const result = await QrScanner.scanImage(file, {
+        returnDetailedScanResult: true,
+        alsoTryWithoutScanRegion: true
+      });
+      this.handleDecoded(result.data);
       await this.startCamera();
     } catch {
       this.feedback.set({
@@ -194,7 +199,8 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     this.cameraStarted = true;
-    void this.startCamera();
+    // Let Angular render the video element before handing it to QrScanner.
+    setTimeout(() => void this.startCamera(), 0);
   }
 
   private async startCamera(): Promise<void> {
@@ -207,23 +213,32 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    const video = this.videoRef?.nativeElement;
+    if (!video) {
+      this.cameraState.set('error');
+      this.cameraError.set('The camera view is not ready yet.');
+      return;
+    }
+
     this.cameraState.set('starting');
     this.cameraError.set('');
 
     try {
-      this.scanner = new Html5Qrcode('qr-attendance-camera', { verbose: false });
-      await this.scanner.start(
-        { facingMode: 'environment' },
+      this.scanner = new QrScanner(
+        video,
+        (result) => this.zone.run(() => this.handleDecoded(result.data)),
         {
-          fps: 10,
-          qrbox: { width: 280, height: 280 },
-          aspectRatio: 1.45
-        },
-        (decodedText) => this.zone.run(() => this.handleDecoded(decodedText)),
-        () => {
-          // No QR code in this frame.
+          onDecodeError: () => {
+            // No QR code in this frame.
+          },
+          preferredCamera: 'environment',
+          maxScansPerSecond: 10,
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
+          returnDetailedScanResult: true
         }
       );
+      await this.scanner.start();
       this.zone.run(() => this.cameraState.set('ready'));
     } catch (error: unknown) {
       this.zone.run(() => {
@@ -241,15 +256,10 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     try {
-      await scanner.stop();
+      scanner.stop();
+      scanner.destroy();
     } catch {
       // Scanner was not running.
-    }
-
-    try {
-      scanner.clear();
-    } catch {
-      // Scanner element was removed.
     }
   }
 

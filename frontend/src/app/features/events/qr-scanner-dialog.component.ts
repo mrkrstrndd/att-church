@@ -1,16 +1,18 @@
 import {
   AfterViewInit,
   Component,
+  ElementRef,
   inject,
   NgZone,
   OnDestroy,
-  signal
+  signal,
+  ViewChild
 } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Html5Qrcode } from 'html5-qrcode';
+import QrScanner from 'qr-scanner';
 import { AttendanceService } from '../../core/services/attendance.service';
 import { apiErrorMessage } from '../../core/utils';
 
@@ -35,6 +37,8 @@ interface ScanFeedback {
   styleUrl: './qr-scanner-dialog.component.scss'
 })
 export class QrScannerDialogComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('scannerVideo') private videoRef?: ElementRef<HTMLVideoElement>;
+
   private readonly attendanceApi = inject(AttendanceService);
   private readonly zone = inject(NgZone);
   private readonly ref = inject(MatDialogRef<QrScannerDialogComponent, number>);
@@ -47,7 +51,7 @@ export class QrScannerDialogComponent implements AfterViewInit, OnDestroy {
   readonly busy = signal(false);
   readonly fileScanning = signal(false);
 
-  private scanner: Html5Qrcode | null = null;
+  private scanner: QrScanner | null = null;
   private destroyed = false;
   private lastCode = '';
   private lastCodeAt = 0;
@@ -71,14 +75,16 @@ export class QrScannerDialogComponent implements AfterViewInit, OnDestroy {
 
     this.fileScanning.set(true);
     this.feedback.set(null);
+    this.lastCode = '';
     await this.stopCamera();
     this.cameraState.set('paused');
 
     try {
-      const scanner = new Html5Qrcode('member-qr-scanner', { verbose: false });
-      const decoded = await scanner.scanFile(file, true);
-      scanner.clear();
-      this.handleDecoded(decoded);
+      const result = await QrScanner.scanImage(file, {
+        returnDetailedScanResult: true,
+        alsoTryWithoutScanRegion: true
+      });
+      this.handleDecoded(result.data);
       await this.startCamera();
     } catch {
       this.feedback.set({
@@ -111,19 +117,32 @@ export class QrScannerDialogComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    const video = this.videoRef?.nativeElement;
+    if (!video) {
+      this.cameraState.set('error');
+      this.cameraError.set('The camera view is not ready yet.');
+      return;
+    }
+
     this.cameraState.set('starting');
     this.cameraError.set('');
 
     try {
-      this.scanner = new Html5Qrcode('member-qr-scanner', { verbose: false });
-      await this.scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
-        (decodedText) => this.zone.run(() => this.handleDecoded(decodedText)),
-        () => {
-          // No QR code in the current frame; keep scanning.
+      this.scanner = new QrScanner(
+        video,
+        (result) => this.zone.run(() => this.handleDecoded(result.data)),
+        {
+          onDecodeError: () => {
+            // No QR code in the current frame; keep scanning.
+          },
+          preferredCamera: 'environment',
+          maxScansPerSecond: 10,
+          highlightScanRegion: false,
+          highlightCodeOutline: false,
+          returnDetailedScanResult: true
         }
       );
+      await this.scanner.start();
       this.zone.run(() => this.cameraState.set('ready'));
     } catch (error: unknown) {
       this.zone.run(() => {
@@ -141,15 +160,10 @@ export class QrScannerDialogComponent implements AfterViewInit, OnDestroy {
     }
 
     try {
-      await scanner.stop();
+      scanner.stop();
+      scanner.destroy();
     } catch {
       // Scanner was not running, or the camera disappeared.
-    }
-
-    try {
-      scanner.clear();
-    } catch {
-      // The scanner element was already removed.
     }
   }
 

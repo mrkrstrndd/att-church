@@ -50,7 +50,13 @@
         </header>
 
         <div class="camera-stage">
-          <div id="qr-attendance-camera" class="camera"></div>
+          <video
+            #scannerVideo
+            id="qr-attendance-camera"
+            class="camera"
+            muted
+            playsinline
+          ></video>
 
           @if (cameraState() === 'starting') {
             <div class="camera-overlay">
