@@ -211,6 +211,24 @@
   animation: pulse 1.8s ease-in-out infinite;
 }
 
+.camera-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.flash-button {
+  width: 2rem;
+  height: 2rem;
+  color: #ffb377;
+}
+
+.flash-button mat-icon {
+  font-size: 1.1rem;
+  height: 1.1rem;
+  width: 1.1rem;
+}
+
 .camera-status {
   color: rgba(255, 248, 242, 0.55);
   font-size: 0.62rem;
@@ -277,70 +295,20 @@
   color: #fff8f2;
 }
 
-.scanner-reticle {
-  position: absolute;
+:host ::ng-deep .scan-region-highlight {
   z-index: 2;
-  top: 50%;
-  left: 50%;
-  width: min(20rem, 62%);
-  aspect-ratio: 1;
-  border: 1px solid rgba(255, 226, 198, 0.38);
-  border-radius: 1.1rem;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 100vmax rgba(10, 5, 2, 0.16);
-  pointer-events: none;
 }
 
-.reticle-corner {
-  position: absolute;
-  width: 2.1rem;
-  height: 2.1rem;
-  border: 3px solid #ffb377;
-  border-radius: 0.25rem;
+:host ::ng-deep .scan-region-highlight-svg {
+  stroke: #ffb377 !important;
+  stroke-width: 4 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 154, 82, 0.45));
 }
 
-.reticle-corner--tl {
-  top: -2px;
-  left: -2px;
-  border-right: 0;
-  border-bottom: 0;
-  border-radius: 0.9rem 0 0 0;
-}
-
-.reticle-corner--tr {
-  top: -2px;
-  right: -2px;
-  border-bottom: 0;
-  border-left: 0;
-  border-radius: 0 0.9rem 0 0;
-}
-
-.reticle-corner--bl {
-  bottom: -2px;
-  left: -2px;
-  border-top: 0;
-  border-right: 0;
-  border-radius: 0 0 0 0.9rem;
-}
-
-.reticle-corner--br {
-  right: -2px;
-  bottom: -2px;
-  border-top: 0;
-  border-left: 0;
-  border-radius: 0 0 0.9rem 0;
-}
-
-.reticle-scanline {
-  position: absolute;
-  top: 8%;
-  left: 7%;
-  width: 86%;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, #ffb377, transparent);
-  box-shadow: 0 0 12px rgba(255, 179, 119, 0.7);
-  animation: scanline 2.8s ease-in-out infinite;
+:host ::ng-deep .code-outline-highlight {
+  stroke: #ffcf9e !important;
+  stroke-width: 4 !important;
+  fill: rgba(255, 179, 119, 0.14) !important;
 }
 
 .feedback {
@@ -626,16 +594,6 @@
   }
 }
 
-@keyframes scanline {
-  0%,
-  100% {
-    top: 8%;
-  }
-  50% {
-    top: 90%;
-  }
-}
-
 @keyframes feedback-in {
   from {
     opacity: 0;
@@ -706,10 +664,6 @@
   .camera-stage {
     min-height: 280px;
     margin-inline: 0.55rem;
-  }
-
-  .scanner-reticle {
-    width: min(14rem, 64%);
   }
 
   .camera-card__foot {

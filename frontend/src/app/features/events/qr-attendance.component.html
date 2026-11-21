@@ -46,7 +46,22 @@
       <section class="camera-card">
         <header class="camera-card__head">
           <span class="live-label"><i></i> Live scanner</span>
-          <span class="camera-status">{{ cameraState() === 'ready' ? 'Camera ready' : cameraState() }}</span>
+          <div class="camera-meta">
+            @if (flashAvailable()) {
+              <button
+                mat-icon-button
+                type="button"
+                class="flash-button"
+                [attr.aria-label]="flashOn() ? 'Turn flashlight off' : 'Turn flashlight on'"
+                (click)="toggleFlash()"
+              >
+                <mat-icon>{{ flashOn() ? 'flash_off' : 'flash_on' }}</mat-icon>
+              </button>
+            }
+            <span class="camera-status">
+              {{ cameraState() === 'ready' ? 'Camera ready' : cameraState() }}
+            </span>
+          </div>
         </header>
 
         <div class="camera-stage">
@@ -73,14 +88,6 @@
             <div class="camera-overlay">
               <mat-icon>image_search</mat-icon>
               <span>Reading QR image…</span>
-            </div>
-          } @else {
-            <div class="scanner-reticle" aria-hidden="true">
-              <span class="reticle-corner reticle-corner--tl"></span>
-              <span class="reticle-corner reticle-corner--tr"></span>
-              <span class="reticle-corner reticle-corner--bl"></span>
-              <span class="reticle-corner reticle-corner--br"></span>
-              <span class="reticle-scanline"></span>
             </div>
           }
 

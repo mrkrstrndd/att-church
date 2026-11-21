@@ -61,6 +61,8 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly totalCheckedIn = signal(0);
   readonly busy = signal(false);
   readonly fileScanning = signal(false);
+  readonly flashAvailable = signal(false);
+  readonly flashOn = signal(false);
 
   private readonly eventId = this.route.snapshot.queryParamMap.get('eventId') ?? '';
   private readonly dayId = this.route.snapshot.queryParamMap.get('dayId') ?? '';
@@ -112,6 +114,19 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async retryCamera(): Promise<void> {
     await this.startCamera();
+  }
+
+  async toggleFlash(): Promise<void> {
+    const scanner = this.scanner;
+    if (!scanner) {
+      return;
+    }
+    try {
+      await scanner.toggleFlash();
+      this.flashOn.set(scanner.isFlashOn());
+    } catch {
+      this.flashAvailable.set(false);
+    }
   }
 
   async onFileSelected(event: Event): Promise<void> {
@@ -198,9 +213,18 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.cameraStarted || !this.viewReady || !this.event() || !this.eventDay()) {
       return;
     }
+
+    // The video lives inside the loaded-state template, so it can appear one
+    // change-detection pass after the event data arrives.
+    if (!this.videoRef?.nativeElement) {
+      if (!this.destroyed) {
+        setTimeout(() => this.maybeStartCamera(), 50);
+      }
+      return;
+    }
+
     this.cameraStarted = true;
-    // Let Angular render the video element before handing it to QrScanner.
-    setTimeout(() => void this.startCamera(), 0);
+    void this.startCamera();
   }
 
   private async startCamera(): Promise<void> {
@@ -233,12 +257,19 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
           },
           preferredCamera: 'environment',
           maxScansPerSecond: 10,
-          highlightScanRegion: false,
-          highlightCodeOutline: false,
+          highlightScanRegion: true,
+          highlightCodeOutline: true,
           returnDetailedScanResult: true
         }
       );
       await this.scanner.start();
+      try {
+        this.scanner.setInversionMode('both');
+        this.flashAvailable.set(await this.scanner.hasFlash());
+        this.flashOn.set(this.scanner.isFlashOn());
+      } catch {
+        this.flashAvailable.set(false);
+      }
       this.zone.run(() => this.cameraState.set('ready'));
     } catch (error: unknown) {
       this.zone.run(() => {
@@ -251,6 +282,8 @@ export class QrAttendanceComponent implements OnInit, AfterViewInit, OnDestroy {
   private async stopCamera(): Promise<void> {
     const scanner = this.scanner;
     this.scanner = null;
+    this.flashAvailable.set(false);
+    this.flashOn.set(false);
     if (!scanner) {
       return;
     }
