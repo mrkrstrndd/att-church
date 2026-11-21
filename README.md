@@ -14,6 +14,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 - **Events** with a single-day/multi-day toggle, server-generated `event_days`, a month filter with month-grouped lists, and protected date edits when attendance already exists.
 - **Attendance check-in** for Admins and Cell Leaders, with idempotent check-ins, per-day tabs, search, live counts, and undo.
 - **QR check-in**: every member has a unique QR pass, available from **Members → Edit member**, with download/print and rotation. Attendance pages include a camera QR scanner plus image-upload fallback.
+- **QR attendance station**: a dedicated full-screen scanner at `/qr-attendance`, opened from the QR icon on the login page. Admins sign in and choose an event day first; the page shows the live camera on the left and a running list of successfully scanned attendees on the right.
 - **VIP check-in**: from **Events → Attendance**, Admins can add a walk-in VIP with an optional inviter. Last-name lookup reuses an existing VIP account; otherwise a VIP with no cell or login is created and checked in immediately.
 - **Dashboard** with KPI cards, zero-filled weekly trend, attendance by cell, six-month comparison, recent-event widget, date-range filter, and ECharts visualizations.
 - **Security**: BCrypt work factor 11, role-based authorization, ProblemDetails errors, lockout, token rotation/reuse revocation, CORS allow-list, and forced password change.
@@ -253,6 +254,7 @@ The specification left several decisions open. This implementation uses:
 - **VIP role:** VIP is mutually exclusive with Member, CellLeader, and Admin, and a VIP cannot be assigned to a cell. In the member form, choosing VIP clears other roles and the cell; choosing a cell switches the member to Member. VIP members cannot be added to a cell until their role is changed.
 - **VIP quick check-in:** Admins can add a VIP from the attendance page. The optional inviter is stored on the member; last-name lookup reuses an existing VIP, otherwise a new VIP is created with no cell or login and checked in immediately.
 - **Login creation:** only Admins can create member login accounts. The API enforces this independently of the UI.
+- **QR attendance station:** only Admin accounts can open the full-screen scanner. Access is granted by signing in through the login-page QR modal and choosing an event day; the standalone page also has an Admin route guard and signs out on Exit.
 - **Cell membership:** one cell per member. Adding a member who already belongs to another cell is rejected.
 - **Leader membership:** when a leader has no cell, creating/updating a cell adds them to it as a member. A leader may also be a member elsewhere.
 - **Attendance:** manual check-in or QR scan by Admins and Cell Leaders. A Cell Leader can only see/check in members of the cell they lead.

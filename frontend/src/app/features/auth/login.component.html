@@ -1,4 +1,15 @@
 <div class="auth-shell">
+  <button
+    mat-icon-button
+    type="button"
+    class="qr-access"
+    matTooltip="QR attendance"
+    aria-label="Open QR attendance station"
+    (click)="openQrAttendance()"
+  >
+    <mat-icon>qr_code_scanner</mat-icon>
+  </button>
+
   <section class="story">
     <div class="story__grain"></div>
     <img

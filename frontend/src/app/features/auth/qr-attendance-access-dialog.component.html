@@ -1,0 +1,143 @@
+<h2 mat-dialog-title>
+  <span>QR attendance station</span>
+  <small>Admin access</small>
+</h2>
+
+<mat-dialog-content>
+  <div class="access-intro">
+    <span class="access-intro__mark"><mat-icon>qr_code_scanner</mat-icon></span>
+    <p>
+      Sign in as an administrator, choose an event day, then open the full-screen scanner.
+    </p>
+  </div>
+
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <form [formGroup]="form">
+    @if (step() === 'credentials') {
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Username</mat-label>
+        <mat-icon matPrefix>person_outline</mat-icon>
+        <input matInput formControlName="username" autocomplete="username" autofocus />
+        @if (form.controls.username.touched && form.controls.username.hasError('required')) {
+          <mat-error>Username is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock_outline</mat-icon>
+        <input
+          matInput
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          (click)="togglePassword()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.password.touched && form.controls.password.hasError('required')) {
+          <mat-error>Password is required.</mat-error>
+        }
+      </mat-form-field>
+
+      <p class="access-note">
+        <mat-icon>shield</mat-icon>
+        Only Admin accounts can start the QR attendance station.
+      </p>
+    } @else {
+      <div class="signed-in">
+        <span class="signed-in__avatar">{{ signedInUser()?.firstName?.charAt(0) }}{{ signedInUser()?.lastName?.charAt(0) }}</span>
+        <span>
+          <small>Signed in as</small>
+          <strong>{{ signedInUser()?.displayName }}</strong>
+        </span>
+        <mat-icon>verified_user</mat-icon>
+      </div>
+
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Event</mat-label>
+        <mat-icon matPrefix>event</mat-icon>
+        <mat-select
+          formControlName="eventId"
+          (selectionChange)="onEventChange($event.value)"
+          [disabled]="eventsLoading()"
+        >
+          @for (event of events(); track event.id) {
+            <mat-option [value]="event.id">
+              {{ event.name }} · {{ eventDateLabel(event) }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (eventsLoading()) {
+          <mat-hint>Loading events…</mat-hint>
+        }
+      </mat-form-field>
+
+      @if (selectedEvent(); as event) {
+        @if (daysLoading()) {
+          <div class="days-loading">
+            <mat-spinner diameter="18" />
+            <span>Loading event days…</span>
+          </div>
+        } @else if (days().length > 1) {
+          <mat-form-field appearance="outline" class="field">
+            <mat-label>Event day</mat-label>
+            <mat-icon matPrefix>calendar_month</mat-icon>
+            <mat-select formControlName="dayId">
+              @for (day of days(); track day.id) {
+                <mat-option [value]="day.id">{{ dayLabel(day) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        } @else if (days().length === 1) {
+          <div class="single-day">
+            <mat-icon>calendar_month</mat-icon>
+            <span>Event day: <strong>{{ dayLabel(days()[0]) }}</strong></span>
+          </div>
+        }
+
+        <div class="event-summary">
+          <span>{{ event.name }}</span>
+          <small>{{ eventRangeLabel(event) }}</small>
+        </div>
+      }
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  @if (step() === 'event') {
+    <button mat-button type="button" (click)="back()">Back</button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="daysLoading() || !form.controls.eventId.value || !form.controls.dayId.value"
+      (click)="start()"
+    >
+      <mat-icon>qr_code_scanner</mat-icon>
+      Start scanning
+    </button>
+  } @else {
+    <button mat-flat-button color="primary" type="button" [disabled]="loading()" (click)="verify()">
+      @if (loading()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Verify credentials
+      }
+    </button>
+  }
+</mat-dialog-actions>

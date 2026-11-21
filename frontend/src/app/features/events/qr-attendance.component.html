@@ -1,0 +1,154 @@
+<div class="station-shell">
+  @if (loading()) {
+    <div class="station-loading">
+      <span class="loading-mark"><mat-icon>qr_code_scanner</mat-icon></span>
+      <mat-spinner diameter="34" />
+      <p>Opening the attendance station…</p>
+    </div>
+  } @else if (loadError()) {
+    <div class="station-error">
+      <span class="loading-mark"><mat-icon>error_outline</mat-icon></span>
+      <h1>Unable to open this station</h1>
+      <p>{{ loadError() }}</p>
+      <button mat-flat-button color="primary" type="button" (click)="exit()">Back to sign in</button>
+    </div>
+  } @else {
+    <header class="station-header">
+      <div class="station-brand">
+        <img src="identity-church-logo.jpg" alt="Identity Church logo" />
+        <div>
+          <strong>Identity Church</strong>
+          <span>QR attendance</span>
+        </div>
+      </div>
+
+      @if (event(); as currentEvent) {
+        <div class="event-heading">
+          <p>Now scanning</p>
+          <h1>{{ currentEvent.name }}</h1>
+          <span>{{ contextLabel() }}</span>
+        </div>
+      }
+
+      <div class="station-actions">
+        <div class="total-checkins">
+          <strong>{{ totalCheckedIn() }}</strong>
+          <span>checked in</span>
+        </div>
+        <button mat-stroked-button type="button" (click)="exit()">
+          <mat-icon>logout</mat-icon>
+          Exit
+        </button>
+      </div>
+    </header>
+
+    <main class="station-main">
+      <section class="camera-card">
+        <header class="camera-card__head">
+          <span class="live-label"><i></i> Live scanner</span>
+          <span class="camera-status">{{ cameraState() === 'ready' ? 'Camera ready' : cameraState() }}</span>
+        </header>
+
+        <div class="camera-stage">
+          <div id="qr-attendance-camera" class="camera"></div>
+
+          @if (cameraState() === 'starting') {
+            <div class="camera-overlay">
+              <mat-spinner diameter="34" />
+              <span>Starting camera…</span>
+            </div>
+          } @else if (cameraState() === 'error') {
+            <div class="camera-overlay camera-overlay--error">
+              <mat-icon>no_photography</mat-icon>
+              <p>{{ cameraError() }}</p>
+              <button mat-stroked-button type="button" (click)="retryCamera()">Try camera again</button>
+            </div>
+          } @else if (cameraState() === 'paused') {
+            <div class="camera-overlay">
+              <mat-icon>image_search</mat-icon>
+              <span>Reading QR image…</span>
+            </div>
+          } @else {
+            <div class="scanner-reticle" aria-hidden="true">
+              <span class="reticle-corner reticle-corner--tl"></span>
+              <span class="reticle-corner reticle-corner--tr"></span>
+              <span class="reticle-corner reticle-corner--bl"></span>
+              <span class="reticle-corner reticle-corner--br"></span>
+              <span class="reticle-scanline"></span>
+            </div>
+          }
+
+          @if (feedback(); as result) {
+            <div class="feedback" [class]="'feedback feedback--' + result.state" role="status">
+              <mat-icon>
+                {{ result.state === 'error' ? 'error_outline' : result.state === 'already' ? 'info' : 'check_circle' }}
+              </mat-icon>
+              <div>
+                <strong>{{ result.title }}</strong>
+                <span>{{ result.detail }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <footer class="camera-card__foot">
+          <p>
+            <mat-icon>center_focus_strong</mat-icon>
+            Hold the member QR pass inside the frame. The camera stays open for the next person.
+          </p>
+
+          <div class="camera-actions">
+            <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="fileInput.click()"
+              [disabled]="fileScanning()"
+            >
+              <mat-icon>upload</mat-icon>
+              {{ fileScanning() ? 'Reading…' : 'Upload QR image' }}
+            </button>
+          </div>
+        </footer>
+      </section>
+
+      <aside class="scans-card">
+        <header class="scans-card__head">
+          <div>
+            <p>This session</p>
+            <h2>Scanned attendees</h2>
+          </div>
+          <span class="scans-count">{{ scans().length }}</span>
+        </header>
+
+        @if (scans().length === 0) {
+          <div class="scans-empty">
+            <span><mat-icon>qr_code_2</mat-icon></span>
+            <strong>Ready for the first scan</strong>
+            <p>Successfully scanned members will appear here.</p>
+          </div>
+        } @else {
+          <div class="scans-list">
+            @for (scan of scans(); track scan.memberId) {
+              <article class="scan-row">
+                <span class="scan-avatar">{{ initials(scan.memberName) }}</span>
+                <span class="scan-copy">
+                  <strong>{{ scan.memberName }}</strong>
+                  <small>Checked in at {{ timeLabel(scan.scannedAt) }}</small>
+                </span>
+                <mat-icon>check_circle</mat-icon>
+              </article>
+            }
+          </div>
+        }
+
+        <footer class="scans-card__foot">
+          <span>{{ scans().length }} scanned this session</span>
+          <strong>{{ totalCheckedIn() }} total checked in</strong>
+        </footer>
+      </aside>
+    </main>
+
+    <app-copyright class="station-credit" />
+  }
+</div>

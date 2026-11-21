@@ -16,6 +16,14 @@ export const routes: Routes = [
       import('./features/auth/change-password.component').then((m) => m.ChangePasswordComponent)
   },
   {
+    path: 'qr-attendance',
+    title: 'QR attendance · Church Attendance',
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin'] },
+    loadComponent: () =>
+      import('./features/events/qr-attendance.component').then((m) => m.QrAttendanceComponent)
+  },
+  {
     path: '',
     component: ShellComponent,
     canActivate: [authGuard],

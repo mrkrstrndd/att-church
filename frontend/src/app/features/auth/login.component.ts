@@ -3,13 +3,16 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthService } from '../../core/services/auth.service';
 import { apiErrorMessage } from '../../core/utils';
 import { CopyrightComponent } from '../../shared/copyright.component';
+import { QrAttendanceAccessDialogComponent } from './qr-attendance-access-dialog.component';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +25,7 @@ import { CopyrightComponent } from '../../shared/copyright.component';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     CopyrightComponent
   ],
   templateUrl: './login.component.html',
@@ -32,6 +36,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(false);
   readonly error = signal('');
@@ -45,6 +50,15 @@ export class LoginComponent {
 
   togglePassword(): void {
     this.showPassword.update((value) => !value);
+  }
+
+  openQrAttendance(): void {
+    this.dialog.open(QrAttendanceAccessDialogComponent, {
+      width: '500px',
+      maxWidth: '94vw',
+      autoFocus: false,
+      disableClose: true
+    });
   }
 
   submit(): void {
