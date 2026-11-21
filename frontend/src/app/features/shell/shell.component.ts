@@ -11,6 +11,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../core/services/auth.service';
 import { Role } from '../../core/models/auth.model';
+import { CopyrightComponent } from '../../shared/copyright.component';
 
 interface NavItem {
   label: string;
@@ -31,7 +32,8 @@ interface NavItem {
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    CopyrightComponent
   ],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'

@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
 import { apiErrorMessage } from '../../core/utils';
+import { CopyrightComponent } from '../../shared/copyright.component';
 
 @Component({
   selector: 'app-change-password',
@@ -20,7 +21,8 @@ import { apiErrorMessage } from '../../core/utils';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    CopyrightComponent
   ],
   templateUrl: './change-password.component.html',
   styleUrl: './change-password.component.scss'

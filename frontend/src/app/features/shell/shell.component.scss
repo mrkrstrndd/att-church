@@ -137,6 +137,9 @@
 }
 
 .content {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
   background:
     radial-gradient(circle at 91% 3%, rgba(255, 192, 143, 0.22), transparent 27rem),
     radial-gradient(circle at 8% 96%, rgba(255, 225, 203, 0.45), transparent 24rem),
@@ -238,9 +241,18 @@
 }
 
 .page {
+  width: 100%;
   max-width: 1440px;
+  flex: 1;
   margin: 0 auto;
-  padding: 2rem clamp(1rem, 3vw, 2.5rem) 3rem;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem) 1rem;
+}
+
+.shell-credit {
+  width: 100%;
+  max-width: 1440px;
+  margin: auto auto 0;
+  padding-bottom: 0.15rem;
 }
 
 @media (max-width: 900px) {

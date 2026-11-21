@@ -320,3 +320,8 @@ The implementation keeps the intended Clean-ish layering while staying pragmatic
 - `Infrastructure` owns EF Core, migrations, JWT/BCrypt implementations, and seeding.
 - `Api` owns controllers, auth middleware, ProblemDetails handling, Swagger, and startup.
 - Frontend feature folders follow `core / shared / features`, with lazy-loaded standalone routes and functional guards/interceptors.
+
+---
+
+© 2026 Phase and Space Software Solutions.
+
