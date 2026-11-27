@@ -1,0 +1,157 @@
+<app-page-header
+  eyebrow="Guest care"
+  title="VIP"
+  subtitle="Track church guests who are not yet connected to a cell. A VIP becomes a Member after their fourth attendance."
+>
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="loading() || !report()?.members?.length"
+    (click)="exportCsv()"
+  >
+    <mat-icon>download</mat-icon>
+    Export report
+  </button>
+</app-page-header>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" class="loading-bar" />
+}
+
+<section class="vip-summary" aria-label="VIP summary">
+  <article class="summary-card summary-card--orange">
+    <span class="summary-card__icon"><mat-icon>star</mat-icon></span>
+    <div>
+      <p>Total VIPs</p>
+      <strong>{{ report()?.totalVips ?? 0 }}</strong>
+    </div>
+  </article>
+
+  <article class="summary-card summary-card--amber">
+    <span class="summary-card__icon"><mat-icon>how_to_reg</mat-icon></span>
+    <div>
+      <p>Total sign-ins</p>
+      <strong>{{ report()?.totalSignIns ?? 0 }}</strong>
+    </div>
+  </article>
+
+  <article class="summary-card summary-card--clay">
+    <span class="summary-card__icon"><mat-icon>trending_up</mat-icon></span>
+    <div>
+      <p>Near promotion</p>
+      <strong>{{ nearPromotion() }}</strong>
+      <small>one more visit</small>
+    </div>
+  </article>
+
+  <div class="promotion-note">
+    <mat-icon>auto_awesome</mat-icon>
+    <p>Automatic promotion happens after the fourth check-in.</p>
+  </div>
+</section>
+
+<section class="vip-card">
+  @if (report()?.members?.length) {
+    <div class="vip-toolbar">
+      <mat-form-field appearance="outline" class="vip-search">
+        <mat-label>Search VIPs</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [value]="searchTerm()" (input)="onSearch($event)" placeholder="Name, email, phone, or inviter" />
+      </mat-form-field>
+      <span class="vip-count">
+        {{ filteredMembers().length }} of {{ report()?.members?.length }} VIPs
+      </span>
+    </div>
+
+    @if (filteredMembers().length > 0) {
+      <div class="table-wrap">
+        <table mat-table [dataSource]="filteredMembers()" class="vip-table">
+          <ng-container matColumnDef="vip">
+            <th mat-header-cell *matHeaderCellDef>VIP</th>
+            <td mat-cell *matCellDef="let member">
+              <div class="vip-name">
+                <span class="avatar">{{ initials(member.fullName) }}</span>
+                <div>
+                  <strong>{{ member.fullName }}</strong>
+                  <small>{{ member.joinedAt ? 'VIP since ' + joinedLabel(member.joinedAt) : 'New VIP' }}</small>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="contact">
+            <th mat-header-cell *matHeaderCellDef>Contact</th>
+            <td mat-cell *matCellDef="let member">
+              <div class="contact-cell">
+                <span>{{ member.email }}</span>
+                <small>{{ member.phoneNo || 'No phone number' }}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="invitedBy">
+            <th mat-header-cell *matHeaderCellDef>Invited by</th>
+            <td mat-cell *matCellDef="let member">
+              <span class="invited-by">{{ member.invitedByName || 'Walk-in' }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="signIns">
+            <th mat-header-cell *matHeaderCellDef class="number-col">Sign-ins</th>
+            <td mat-cell *matCellDef="let member" class="number-col">
+              <strong class="signin-count">{{ member.signInCount }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="progress">
+            <th mat-header-cell *matHeaderCellDef>Toward membership</th>
+            <td mat-cell *matCellDef="let member">
+              <div class="progress-cell">
+                <div
+                  class="progress-track"
+                  [attr.aria-label]="member.signInCount + ' of 4 sign-ins'"
+                  role="progressbar"
+                  [attr.aria-valuenow]="member.signInCount"
+                  aria-valuemin="0"
+                  aria-valuemax="4"
+                >
+                  @for (step of [1, 2, 3, 4]; track step) {
+                    <span [class.is-filled]="member.signInCount >= step"></span>
+                  }
+                </div>
+                @if (member.signInCount === 3) {
+                  <small class="promotion-hint">Next visit → Member</small>
+                } @else {
+                  <small>{{ member.signInCount }}/4</small>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="joined">
+            <th mat-header-cell *matHeaderCellDef class="joined-col">VIP since</th>
+            <td mat-cell *matCellDef="let member" class="joined-col">
+              <span class="joined-date">{{ joinedLabel(member.joinedAt) }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+    } @else {
+      <app-empty-state
+        icon="search_off"
+        title="No VIPs match your search"
+        message="Try a different name, email, phone number, or inviter."
+      />
+    }
+  } @else if (!loading()) {
+    <app-empty-state
+      icon="star"
+      title="No VIPs to track yet"
+      message="VIPs added from the attendance page or members directory will appear here."
+    />
+  }
+</section>

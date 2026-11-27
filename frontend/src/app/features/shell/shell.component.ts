@@ -67,7 +67,8 @@ export class ShellComponent {
       { label: 'Dashboard', icon: 'space_dashboard', route: '/dashboard', roles: ['Admin', 'CellLeader'] },
       { label: 'Events', icon: 'event', route: '/events' },
       { label: 'Members', icon: 'groups', route: '/members' },
-      { label: 'Cells', icon: 'hub', route: '/cells' }
+      { label: 'Cells', icon: 'hub', route: '/cells' },
+      { label: 'VIP', icon: 'star', route: '/vip', roles: ['Admin'] }
     ];
     return items.filter(
       (item) => !item.roles || item.roles.some((role) => this.auth.hasRole(role as Role))

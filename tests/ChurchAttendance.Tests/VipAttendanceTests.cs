@@ -1,5 +1,6 @@
 using ChurchAttendance.Application.Attendance;
 using ChurchAttendance.Application.Common;
+using ChurchAttendance.Application.Vip;
 using ChurchAttendance.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +21,7 @@ public class VipAttendanceTests
         });
         var (eventId, dayId) = await AddEventAsync(db);
 
-        var service = new AttendanceService(db, new FixedChurchClock(new DateOnly(2026, 11, 20)));
+        var service = CreateService(db);
         var result = await service.CreateOrCheckInVipAsync(
             eventId,
             dayId,
@@ -61,7 +62,7 @@ public class VipAttendanceTests
         var (eventId, dayId) = await AddEventAsync(db);
         await db.SaveChangesAsync();
 
-        var service = new AttendanceService(db, new FixedChurchClock(new DateOnly(2026, 11, 20)));
+        var service = CreateService(db);
         var first = await service.CreateOrCheckInVipAsync(
             eventId,
             dayId,
@@ -95,7 +96,7 @@ public class VipAttendanceTests
         var (eventId, dayId) = await AddEventAsync(db);
         await db.SaveChangesAsync();
 
-        var service = new AttendanceService(db, new FixedChurchClock(new DateOnly(2026, 11, 20)));
+        var service = CreateService(db);
         var result = await service.CreateOrCheckInVipAsync(
             eventId,
             dayId,
@@ -125,7 +126,7 @@ public class VipAttendanceTests
             new[] { RoleNames.CellLeader },
             Guid.NewGuid());
 
-        var service = new AttendanceService(db, new FixedChurchClock(new DateOnly(2026, 11, 20)));
+        var service = CreateService(db);
 
         await Assert.ThrowsAsync<ForbiddenException>(() =>
             service.CreateOrCheckInVipAsync(
@@ -139,6 +140,12 @@ public class VipAttendanceTests
                     null,
                     null),
                 cellLeader));
+    }
+
+    private static AttendanceService CreateService(Infrastructure.Persistence.AppDbContext db)
+    {
+        var clock = new FixedChurchClock(new DateOnly(2026, 11, 20));
+        return new AttendanceService(db, clock, new VipService(db, clock));
     }
 
     private static async Task<(Guid EventId, Guid DayId)> AddEventAsync(Infrastructure.Persistence.AppDbContext db)

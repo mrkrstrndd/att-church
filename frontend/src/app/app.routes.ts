@@ -54,6 +54,13 @@ export const routes: Routes = [
           import('./features/cells/cell-detail.component').then((m) => m.CellDetailComponent)
       },
       {
+        path: 'vip',
+        title: 'VIP · Church Attendance',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin'] },
+        loadComponent: () => import('./features/vip/vip.component').then((m) => m.VipComponent)
+      },
+      {
         path: 'events',
         title: 'Events · Church Attendance',
         loadComponent: () =>

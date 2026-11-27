@@ -5,6 +5,7 @@ using ChurchAttendance.Application.Common;
 using ChurchAttendance.Application.Dashboard;
 using ChurchAttendance.Application.Events;
 using ChurchAttendance.Application.Members;
+using ChurchAttendance.Application.Vip;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ChurchAttendance.Application;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<EventService>();
         services.AddScoped<AttendanceService>();
         services.AddScoped<DashboardService>();
+        services.AddScoped<VipService>();
 
         return services;
     }

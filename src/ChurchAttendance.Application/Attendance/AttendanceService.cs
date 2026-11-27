@@ -1,4 +1,5 @@
 using ChurchAttendance.Application.Common;
+using ChurchAttendance.Application.Vip;
 using ChurchAttendance.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,13 @@ public class AttendanceService
 {
     private readonly IApplicationDbContext _db;
     private readonly IChurchClock _clock;
+    private readonly VipService _vip;
 
-    public AttendanceService(IApplicationDbContext db, IChurchClock clock)
+    public AttendanceService(IApplicationDbContext db, IChurchClock clock, VipService vip)
     {
         _db = db;
         _clock = clock;
+        _vip = vip;
     }
 
     public async Task<AttendanceDayDto> GetDayAsync(
@@ -121,6 +124,7 @@ public class AttendanceService
         }
 
         await _db.SaveChangesAsync(ct);
+        await _vip.PromoteAllEligibleAsync(ct);
 
         var totalQuery = _db.Attendance.Where(a => a.EventDayId == dayId);
         if (scopeCellId is not null)
@@ -168,6 +172,8 @@ public class AttendanceService
         if (scopeCellId is not null)
             totalQuery = totalQuery.Where(a => a.Member.CellId == scopeCellId);
         var total = await totalQuery.CountAsync(ct);
+
+        await _vip.PromoteIfEligibleAsync(member.Id, ct);
 
         return new ScanCheckInResultDto(
             member.Id,
@@ -276,6 +282,8 @@ public class AttendanceService
         await _db.SaveChangesAsync(ct);
 
         var total = await _db.Attendance.CountAsync(a => a.EventDayId == dayId, ct);
+
+        await _vip.PromoteIfEligibleAsync(member.Id, ct);
 
         return new VipCheckInResultDto(
             member.Id,

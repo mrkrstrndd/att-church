@@ -16,6 +16,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 - **QR check-in**: every member has a unique QR pass, available from **Members → Edit member**, with download/print and rotation. Attendance pages include a camera QR scanner plus image-upload fallback.
 - **QR attendance station**: a dedicated full-screen scanner at `/qr-attendance`, opened from the QR icon on the login page. Admins sign in and choose an event day first; the page shows the live camera on the left and a running list of successfully scanned attendees on the right. It uses Nimiq `qr-scanner`'s scan-region and code-outline overlays, with a flashlight toggle on supported devices.
 - **VIP check-in**: from **Events → Attendance**, Admins can add a walk-in VIP with an optional inviter. Last-name lookup reuses an existing VIP account; otherwise a VIP with no cell or login is created and checked in immediately.
+- **VIP tracking**: an Admin-only **VIP** page lists every current VIP with their invitation source, total sign-ins, and progress toward membership. The report exports to CSV, and a VIP automatically becomes a Member after their fourth attendance.
 - **Dashboard** with KPI cards, zero-filled weekly trend, attendance by cell, six-month comparison, recent-event widget, date-range filter, and ECharts visualizations.
 - **Security**: BCrypt work factor 11, role-based authorization, ProblemDetails errors, lockout, token rotation/reuse revocation, CORS allow-list, and forced password change.
 - **Responsive UI** built with Angular Material, designed for mobile check-in.
@@ -205,6 +206,7 @@ All routes are under `/api`. Errors use RFC 7807 `ProblemDetails`. Lists default
 | Cells | `GET /cells`, `GET /cells/{id}`, `POST /cells`, `PUT /cells/{id}`, `DELETE /cells/{id}`, `POST /cells/{id}/members`, `DELETE /cells/{id}/members/{memberId}` |
 | Events | `GET /events` (`from`, `to`, or `month=YYYY-MM`), `GET /events/months`, `GET /events/{id}`, `POST /events`, `PUT /events/{id}`, `DELETE /events/{id}?force=true` |
 | Attendance | `GET/POST /events/{eventId}/days/{dayId}/attendance`, `POST .../attendance/scan`, `POST .../attendance/vip`, `DELETE .../attendance/{memberId}` |
+| VIP | `GET /vip/report` |
 | Dashboard | `/dashboard/kpis`, `/dashboard/weekly-trend`, `/dashboard/attendance-by-cell`, `/dashboard/monthly-comparison`, `/dashboard/recent-events` |
 
 Use Swagger for request/response schemas.
@@ -253,6 +255,7 @@ The specification left several decisions open. This implementation uses:
 
 - **Cell leader validation:** assigning a leader without the `CellLeader` role is rejected with `400`; the role is **not** auto-granted.
 - **VIP role:** VIP is mutually exclusive with Member, CellLeader, and Admin, and a VIP cannot be assigned to a cell. In the member form, choosing VIP clears other roles and the cell; choosing a cell switches the member to Member. VIP members cannot be added to a cell until their role is changed.
+- **VIP promotion:** after the fourth attendance, a VIP is automatically changed to the Member role. The VIP page also resolves any legacy VIP records that already have four or more check-ins.
 - **VIP quick check-in:** Admins can add a VIP from the attendance page. The optional inviter is stored on the member; last-name lookup reuses an existing VIP, otherwise a new VIP is created with no cell or login and checked in immediately.
 - **Login creation:** only Admins can create member login accounts. The API enforces this independently of the UI.
 - **QR attendance station:** only Admin accounts can open the full-screen scanner. Access is granted by signing in through the login-page QR modal and choosing an event day; the standalone page also has an Admin route guard and signs out on Exit.
@@ -310,9 +313,9 @@ Covered: token storage for Remember me, refresh rotation, login form validation,
 |---|---|
 | ![Member QR pass](docs/screenshots/member-qr.png) | ![VIP role](docs/screenshots/vip-role.png) |
 
-| VIP check-in |
-|---|
-| ![VIP check-in](docs/screenshots/vip-checkin.png) |
+| VIP check-in | VIP tracking |
+|---|---|
+| ![VIP check-in](docs/screenshots/vip-checkin.png) | ![VIP tracking](docs/screenshots/vip.png) |
 
 ## Notes on the reference specification
 
