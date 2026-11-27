@@ -1,0 +1,80 @@
+<article class="member-node">
+  <div class="member-row">
+    <span class="member-avatar">{{ initials(member.fullName) }}</span>
+
+    @if (canExpand) {
+      <button
+        type="button"
+        class="member-copy member-copy--button"
+        [attr.aria-expanded]="expanded()"
+        (click)="toggle()"
+      >
+        <span class="member-name-line">
+          <strong>{{ member.fullName }}</strong>
+          <mat-icon>{{ expanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </span>
+        <small>{{ member.email }}</small>
+        <small class="leads-label">Leads {{ ledCell?.name }}</small>
+      </button>
+    } @else {
+      <div class="member-copy">
+        <strong>{{ member.fullName }}</strong>
+        <small>{{ member.email }}</small>
+        @if (ledCell) {
+          <small class="leads-label">Leads {{ ledCell.name }}</small>
+        }
+      </div>
+    }
+
+    <span class="member-phone">{{ member.phoneNo || '—' }}</span>
+    <div class="member-roles">
+      @for (role of member.roles; track role) {
+        <span [class]="roleClass(role)">{{ role }}</span>
+      }
+      @if (member.isLeader) {
+        <span class="leader-badge"><mat-icon>verified</mat-icon>Leader</span>
+      }
+    </div>
+  </div>
+
+  @if (expanded()) {
+    <div class="nested-panel">
+      @if (loading()) {
+        <div class="nested-loading">
+          <mat-spinner diameter="20" />
+          <span>Loading {{ ledCell?.name }} members…</span>
+        </div>
+      } @else if (error()) {
+        <div class="nested-error">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error() }}</span>
+        </div>
+      } @else if (detail(); as nested) {
+        <header class="nested-panel__head">
+          <div>
+            <p>Members under {{ member.fullName }}</p>
+            <strong>{{ nested.name }}</strong>
+          </div>
+          <span>{{ nested.members.length }} {{ nested.members.length === 1 ? 'person' : 'people' }}</span>
+        </header>
+
+        @if (nested.members.length > 0) {
+          <div class="nested-members">
+            @for (nestedMember of nested.members; track nestedMember.id) {
+              <app-cell-member-node
+                [member]="nestedMember"
+                [cells]="cells"
+                [ancestorIds]="childAncestorIds"
+              />
+            }
+          </div>
+        } @else {
+          <div class="nested-empty">
+            <mat-icon>group_add</mat-icon>
+            <span>{{ nested.name }} has no members yet.</span>
+          </div>
+        }
+      }
+    </div>
+  }
+</article>

@@ -131,84 +131,11 @@
                       @if (detail.members.length > 0) {
                         <div class="accordion-members">
                           @for (member of detail.members; track member.id) {
-                            <article class="accordion-member">
-                              <span class="member-avatar">{{ memberInitials(member) }}</span>
-                              @if (leaderCellFor(member); as ledCell) {
-                                <button
-                                  type="button"
-                                  class="member-copy member-copy--button"
-                                  [attr.aria-expanded]="expandedLeaderMemberId() === member.id"
-                                  (click)="toggleLeaderMembers(member)"
-                                >
-                                  <span class="member-name-line">
-                                    <strong>{{ member.fullName }}</strong>
-                                    <mat-icon>
-                                      {{ expandedLeaderMemberId() === member.id ? 'expand_less' : 'expand_more' }}
-                                    </mat-icon>
-                                  </span>
-                                  <small>{{ member.email }}</small>
-                                  <small class="leads-label">Leads {{ ledCell.name }}</small>
-                                </button>
-                              } @else {
-                                <div class="member-copy">
-                                  <strong>{{ member.fullName }}</strong>
-                                  <small>{{ member.email }}</small>
-                                </div>
-                              }
-                              <span class="member-phone">{{ member.phoneNo || '—' }}</span>
-                              <div class="member-roles">
-                                @for (role of member.roles; track role) {
-                                  <span [class]="roleClass(role)">{{ role }}</span>
-                                }
-                                @if (member.isLeader) {
-                                  <span class="leader-badge"><mat-icon>verified</mat-icon>Leader</span>
-                                }
-                              </div>
-
-                              @if (expandedLeaderMemberId() === member.id && leaderCellFor(member); as ledCell) {
-                                <div class="nested-panel">
-                                  @if (nestedLoadingCellId() === ledCell.id) {
-                                    <div class="nested-loading">
-                                      <mat-spinner diameter="20" />
-                                      <span>Loading {{ ledCell.name }} members…</span>
-                                    </div>
-                                  } @else if (detailFor(ledCell.id); as nested) {
-                                    <header class="nested-panel__head">
-                                      <div>
-                                        <p>Members under {{ member.fullName }}</p>
-                                        <strong>{{ ledCell.name }}</strong>
-                                      </div>
-                                      <span>{{ nested.members.length }} {{ nested.members.length === 1 ? 'person' : 'people' }}</span>
-                                    </header>
-
-                                    @if (nested.members.length > 0) {
-                                      <div class="nested-members">
-                                        @for (nestedMember of nested.members; track nestedMember.id) {
-                                          <div class="nested-member">
-                                            <span class="nested-avatar">{{ memberInitials(nestedMember) }}</span>
-                                            <div class="nested-copy">
-                                              <strong>{{ nestedMember.fullName }}</strong>
-                                              <small>{{ nestedMember.email }}</small>
-                                            </div>
-                                            <span class="nested-phone">{{ nestedMember.phoneNo || '—' }}</span>
-                                            <div class="nested-roles">
-                                              @for (role of nestedMember.roles; track role) {
-                                                <span [class]="roleClass(role)">{{ role }}</span>
-                                              }
-                                            </div>
-                                          </div>
-                                        }
-                                      </div>
-                                    } @else {
-                                      <div class="accordion-empty nested-empty">
-                                        <mat-icon>group_add</mat-icon>
-                                        <span>{{ ledCell.name }} has no members yet.</span>
-                                      </div>
-                                    }
-                                  }
-                                </div>
-                              }
-                            </article>
+                            <app-cell-member-node
+                              [member]="member"
+                              [cells]="cells()"
+                              [ancestorIds]="[cell.leaderMemberId]"
+                            />
                           }
                         </div>
                       } @else {
