@@ -122,6 +122,11 @@ public class CellService
         if (members.Count != ids.Count)
             throw new AppValidationException(nameof(request.MemberIds), "One or more selected members do not exist or are inactive.");
 
+        if (members.Any(m => m.Id == cell.LeaderMemberId))
+            throw new AppValidationException(
+                nameof(request.MemberIds),
+                "The cell leader cannot be added as a member of the cell they lead.");
+
         var vipMembers = members
             .Where(m => m.MemberRoles.Any(mr =>
                 string.Equals(mr.Role.Name, RoleNames.Vip, StringComparison.OrdinalIgnoreCase)))
@@ -131,11 +136,15 @@ public class CellService
                 "VIP members must be changed to Member before joining a cell: " +
                 string.Join(", ", vipMembers.Select(m => m.FullName)) + ".");
 
-        var inOtherCell = members.Where(m => m.CellId is not null && m.CellId != cellId).ToList();
-        if (inOtherCell.Count > 0)
+        var blockedMoves = members
+            .Where(m => m.CellId is not null && m.CellId != cellId)
+            .Where(m => !m.MemberRoles.Any(mr =>
+                string.Equals(mr.Role.Name, RoleNames.CellLeader, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+        if (blockedMoves.Count > 0)
             throw new ConflictException(
                 "These members already belong to another cell: " +
-                string.Join(", ", inOtherCell.Select(m => m.FullName)) + ".");
+                string.Join(", ", blockedMoves.Select(m => m.FullName)) + ".");
 
         var now = _clock.UtcNow;
         foreach (var member in members.Where(m => m.CellId != cellId))
@@ -146,6 +155,54 @@ public class CellService
 
         cell.UpdatedAt = now;
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<CellCandidateDto>> GetCandidatesAsync(
+        Guid cellId, string? search, CancellationToken ct = default)
+    {
+        var cell = await _db.Cells
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == cellId && c.IsActive, ct)
+            ?? throw new NotFoundException("Cell not found.");
+
+        var query = _db.Members
+            .AsNoTracking()
+            .Include(m => m.Cell)
+            .Include(m => m.MemberRoles).ThenInclude(mr => mr.Role)
+            .Where(m => m.IsActive)
+            .Where(m => m.Id != cell.LeaderMemberId)
+            .Where(m => m.CellId != cellId)
+            .Where(m => !m.MemberRoles.Any(mr => mr.Role.Name == RoleNames.Vip))
+            .Where(m => m.CellId == null || m.MemberRoles.Any(mr => mr.Role.Name == RoleNames.CellLeader));
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim().ToLowerInvariant();
+            query = query.Where(m =>
+                m.FirstName.ToLower().Contains(term) ||
+                m.LastName.ToLower().Contains(term) ||
+                m.Email.ToLower().Contains(term) ||
+                (m.PhoneNo != null && m.PhoneNo.ToLower().Contains(term)));
+        }
+
+        var candidates = await query
+            .OrderBy(m => m.LastName)
+            .ThenBy(m => m.FirstName)
+            .Take(200)
+            .ToListAsync(ct);
+
+        return candidates
+            .Select(m => new CellCandidateDto(
+                m.Id,
+                m.FullName,
+                m.Email,
+                m.PhoneNo,
+                m.Cell?.Name,
+                m.MemberRoles
+                    .OrderBy(mr => mr.RoleId)
+                    .Select(mr => mr.Role.Name)
+                    .ToList()))
+            .ToList();
     }
 
     public async Task RemoveMemberAsync(Guid cellId, Guid memberId, CancellationToken ct = default)

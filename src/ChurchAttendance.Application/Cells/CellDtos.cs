@@ -8,6 +8,14 @@ public record CellMemberDto(
     IReadOnlyList<string> Roles,
     bool IsLeader);
 
+public record CellCandidateDto(
+    Guid Id,
+    string FullName,
+    string Email,
+    string? PhoneNo,
+    string? CellName,
+    IReadOnlyList<string> Roles);
+
 public record CellListItemDto(
     Guid Id,
     string Name,

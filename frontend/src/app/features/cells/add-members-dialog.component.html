@@ -9,13 +9,14 @@
   }
 
   <mat-form-field appearance="outline" class="search">
-    <mat-label>Search unassigned members</mat-label>
+    <mat-label>Search members or cell leaders</mat-label>
     <mat-icon matPrefix>search</mat-icon>
     <input matInput [formControl]="search" placeholder="Name, email, or phone" />
   </mat-form-field>
 
   <p class="vip-hint">
-    VIP attendees are not shown. Change their role to Member before adding them to a cell.
+    Cell leaders from other cells are available here and will move into this cell when added.
+    The leader of this cell, VIPs, and current members are not shown.
   </p>
 
   <mat-progress-bar mode="indeterminate" [class.is-hidden]="!loading()" class="loading" />
@@ -26,10 +27,13 @@
         @for (member of members(); track member.id) {
           <mat-list-option [value]="member.id" checkboxPosition="before">
             <div class="option">
-              <span class="avatar">{{ member.firstName.charAt(0) }}{{ member.lastName.charAt(0) }}</span>
+              <span class="avatar">{{ initials(member) }}</span>
               <div class="option__copy">
                 <strong>{{ member.fullName }}</strong>
-                <small>{{ member.email }}{{ member.cellName ? ' · ' + member.cellName : '' }}</small>
+                <small>
+                  {{ member.email }}{{ member.cellName ? ' · ' + member.cellName : ' · Unassigned' }}
+                  · {{ roleSummary(member) }}
+                </small>
               </div>
               <span class="option__email"><mat-icon>mail_outline</mat-icon></span>
             </div>
@@ -39,7 +43,7 @@
     } @else if (!loading()) {
       <div class="empty">
         <mat-icon>group_add</mat-icon>
-        <p>No unassigned members match this search.</p>
+        <p>No members or cell leaders match this search.</p>
       </div>
     }
   </div>

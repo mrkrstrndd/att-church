@@ -42,6 +42,13 @@ public class CellsController : ControllerBase
     public async Task<ActionResult<CellDto>> Update(Guid id, UpdateCellRequest request, CancellationToken ct) =>
         Ok(await _cells.UpdateAsync(id, request, ct));
 
+    [HttpGet("{id:guid}/candidates")]
+    [Authorize(Roles = RoleNames.Admin)]
+    [ProducesResponseType(typeof(IReadOnlyList<CellCandidateDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<CellCandidateDto>>> GetCandidates(
+        Guid id, [FromQuery] string? search, CancellationToken ct) =>
+        Ok(await _cells.GetCandidatesAsync(id, search, ct));
+
     [HttpPost("{id:guid}/members")]
     [Authorize(Roles = RoleNames.Admin)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

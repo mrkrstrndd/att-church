@@ -9,6 +9,15 @@ export interface CellMember {
   isLeader: boolean;
 }
 
+export interface CellCandidate {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNo: string | null;
+  cellName: string | null;
+  roles: Role[];
+}
+
 export interface CellListItem {
   id: string;
   name: string;

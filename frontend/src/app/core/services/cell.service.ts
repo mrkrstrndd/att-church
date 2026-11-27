@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE } from '../api';
-import { CellDetail, CellListItem, CellPayload } from '../models/cell.model';
+import { CellCandidate, CellDetail, CellListItem, CellPayload } from '../models/cell.model';
 
 @Injectable({ providedIn: 'root' })
 export class CellService {
@@ -14,6 +14,14 @@ export class CellService {
 
   get(id: string): Observable<CellDetail> {
     return this.http.get<CellDetail>(`${API_BASE}/cells/${id}`);
+  }
+
+  candidates(id: string, search = ''): Observable<CellCandidate[]> {
+    let params = new HttpParams();
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<CellCandidate[]>(`${API_BASE}/cells/${id}/candidates`, { params });
   }
 
   create(payload: CellPayload): Observable<CellDetail> {

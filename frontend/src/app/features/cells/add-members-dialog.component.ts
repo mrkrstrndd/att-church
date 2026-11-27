@@ -11,8 +11,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CellService } from '../../core/services/cell.service';
-import { MemberService } from '../../core/services/member.service';
-import { Member } from '../../core/models/member.model';
+import { CellCandidate } from '../../core/models/cell.model';
 import { apiErrorMessage } from '../../core/utils';
 
 export interface AddMembersDialogData {
@@ -40,13 +39,12 @@ export interface AddMembersDialogData {
 })
 export class AddMembersDialogComponent {
   private readonly fb = inject(FormBuilder);
-  private readonly membersApi = inject(MemberService);
   private readonly cellsApi = inject(CellService);
   private readonly ref = inject(MatDialogRef<AddMembersDialogComponent, boolean>);
   private readonly destroyRef = inject(DestroyRef);
   readonly data = inject<AddMembersDialogData>(MAT_DIALOG_DATA);
 
-  readonly members = signal<Member[]>([]);
+  readonly members = signal<CellCandidate[]>([]);
   readonly selected = signal<string[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -63,16 +61,11 @@ export class AddMembersDialogComponent {
 
   load(): void {
     this.loading.set(true);
-    this.membersApi
-      .list({
-        search: this.search.value,
-        unassigned: true,
-        page: 1,
-        pageSize: 100
-      })
+    this.cellsApi
+      .candidates(this.data.cellId, this.search.value)
       .subscribe({
-        next: (result) => {
-          this.members.set(result.items.filter((member) => !member.roles.includes('VIP')));
+        next: (members) => {
+          this.members.set(members);
           this.loading.set(false);
         },
         error: (error: unknown) => {
@@ -80,6 +73,19 @@ export class AddMembersDialogComponent {
           this.error.set(apiErrorMessage(error, 'Could not load members.'));
         }
       });
+  }
+
+  initials(member: CellCandidate): string {
+    return member.fullName
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+
+  roleSummary(member: CellCandidate): string {
+    return member.roles.join(' · ');
   }
 
   onSelection(change: MatSelectionListChange): void {
