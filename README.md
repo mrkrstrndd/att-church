@@ -10,7 +10,7 @@ Built from the supplied technical specification with **ASP.NET Core 8**, **Postg
 
 - **JWT authentication** with 15-minute access tokens, rotating hashed refresh tokens, "Remember me" (30 days), account lockout after five failed attempts, and forced first-login password change.
 - **Members** with multiple roles (`Member`, `VIP`, `CellLeader`, `Admin`), optional cell assignment, soft deletion, filtered/paged directory, and optional login-account creation. Creating login accounts is restricted to Admins.
-- **Cells** with exactly one validated `CellLeader`, no member cap, an expandable table showing each cell's members, add/remove members, and soft deletion. Cell leaders from other cells are available in the add-member picker and move into the selected cell when added.
+- **Cells** with exactly one validated `CellLeader`, no member cap, an expandable table showing each cell's members, nested member views for members who also lead another cell, add/remove members, and soft deletion. Cell leaders from other cells are available in the add-member picker and move into the selected cell when added.
 - **Events** with a single-day/multi-day toggle, server-generated `event_days`, a month filter with month-grouped lists, and protected date edits when attendance already exists.
 - **Attendance check-in** for Admins and Cell Leaders, with idempotent check-ins, per-day tabs, search, live counts, and undo.
 - **QR check-in**: every member has a unique QR pass, available from **Members → Edit member**, with download/print and rotation. Attendance pages include a camera QR scanner plus image-upload fallback.
@@ -259,8 +259,9 @@ The specification left several decisions open. This implementation uses:
 - **VIP quick check-in:** Admins can add a VIP from the attendance page. The optional inviter is stored on the member; last-name lookup reuses an existing VIP, otherwise a new VIP is created with no cell or login and checked in immediately.
 - **Login creation:** only Admins can create member login accounts. The API enforces this independently of the UI.
 - **QR attendance station:** only Admin accounts can open the full-screen scanner. Access is granted by signing in through the login-page QR modal and choosing an event day; the standalone page also has an Admin route guard and signs out on Exit.
-- **Cell membership:** one cell per member. Adding a member who already belongs to another cell is rejected.
+- **Cell membership:** one cell per member. Regular members who already belong to another cell are rejected; CellLeaders may be moved into another cell.
 - **Leader membership:** cell leadership and cell membership are independent. Creating/updating a cell no longer automatically adds the leader to that cell; a CellLeader may belong to another leader's cell or be explicitly added to their own. The add-member picker includes CellLeaders from other cells, excludes the current cell's leader, and blocks adding that leader through the API.
+- **Nested leader view:** when a CellLeader is also a member of another cell, clicking their name in the expanded cell list shows the members of the cell they lead.
 - **Attendance:** manual check-in or QR scan by Admins and Cell Leaders. A Cell Leader can only see/check in members of the cell they lead.
 - **Member QR passes:** one stable opaque token per member; only Admins can view or rotate a member’s QR code.
 - **Dashboard scope:** Admins see all data; Cell Leaders see aggregate data scoped to their own cell. Events-this-month counts remain church-wide.

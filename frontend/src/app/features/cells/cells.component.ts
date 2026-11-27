@@ -43,8 +43,10 @@ export class CellsComponent implements OnInit {
   readonly cells = signal<CellListItem[]>([]);
   readonly loading = signal(true);
   readonly expandedCellId = signal<string | null>(null);
+  readonly expandedLeaderMemberId = signal<string | null>(null);
   readonly details = signal<Record<string, CellDetail>>({});
   readonly detailLoadingId = signal<string | null>(null);
+  readonly nestedLoadingCellId = signal<string | null>(null);
   readonly totalMembers = computed(() => this.cells().reduce((sum, cell) => sum + cell.memberCount, 0));
 
   ngOnInit(): void {
@@ -68,6 +70,7 @@ export class CellsComponent implements OnInit {
   }
 
   toggleCell(cell: CellListItem): void {
+    this.expandedLeaderMemberId.set(null);
     if (this.expandedCellId() === cell.id) {
       this.expandedCellId.set(null);
       return;
@@ -87,6 +90,41 @@ export class CellsComponent implements OnInit {
       error: (error: unknown) => {
         this.detailLoadingId.set(null);
         this.snackBar.open(apiErrorMessage(error, 'Could not load the members for this cell.'), 'Close', {
+          duration: 5000
+        });
+      }
+    });
+  }
+
+  leaderCellFor(member: CellMember): CellListItem | null {
+    return this.cells().find((cell) => cell.leaderMemberId === member.id) ?? null;
+  }
+
+  toggleLeaderMembers(member: CellMember): void {
+    const ledCell = this.leaderCellFor(member);
+    if (!ledCell) {
+      return;
+    }
+
+    if (this.expandedLeaderMemberId() === member.id) {
+      this.expandedLeaderMemberId.set(null);
+      return;
+    }
+
+    this.expandedLeaderMemberId.set(member.id);
+    if (this.details()[ledCell.id]) {
+      return;
+    }
+
+    this.nestedLoadingCellId.set(ledCell.id);
+    this.cellsApi.get(ledCell.id).subscribe({
+      next: (detail) => {
+        this.details.update((current) => ({ ...current, [ledCell.id]: detail }));
+        this.nestedLoadingCellId.set(null);
+      },
+      error: (error: unknown) => {
+        this.nestedLoadingCellId.set(null);
+        this.snackBar.open(apiErrorMessage(error, "Could not load this leader's members."), 'Close', {
           duration: 5000
         });
       }
@@ -143,6 +181,7 @@ export class CellsComponent implements OnInit {
             this.snackBar.open(`${cell.name} was deactivated.`, 'Close', { duration: 3500 });
             if (this.expandedCellId() === cell.id) {
               this.expandedCellId.set(null);
+              this.expandedLeaderMemberId.set(null);
             }
             this.load();
           },
