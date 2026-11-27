@@ -81,12 +81,6 @@ public class CellService
 
         _db.Cells.Add(cell);
 
-        if (leader.CellId is null)
-        {
-            leader.CellId = cell.Id;
-            leader.UpdatedAt = now;
-        }
-
         await _db.SaveChangesAsync(ct);
         return await GetByIdAsync(cell.Id, ct);
     }
@@ -106,9 +100,6 @@ public class CellService
         cell.Description = CleanOptional(request.Description);
         cell.LeaderMemberId = leader.Id;
         cell.UpdatedAt = _clock.UtcNow;
-
-        if (leader.CellId is null)
-            leader.CellId = cell.Id;
 
         await _db.SaveChangesAsync(ct);
         return await GetByIdAsync(cell.Id, ct);

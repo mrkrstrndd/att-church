@@ -1,7 +1,7 @@
 <app-page-header
   eyebrow="Small groups"
   title="Cells"
-  subtitle="The small communities where members are known, encouraged, and cared for."
+  subtitle="The small communities where members are known and cared for. Cell leaders can also belong to another cell."
 >
   @if (auth.isAdmin()) {
     <button mat-flat-button color="primary" type="button" (click)="createCell()">
@@ -25,39 +25,145 @@
       <span class="summary__icon summary__icon--gold"><mat-icon>groups</mat-icon></span>
       <div><strong>{{ totalMembers() }}</strong><small>Members in cells</small></div>
     </div>
+    <p class="summary__hint">
+      <mat-icon>info</mat-icon>
+      A CellLeader may also be a member of another cell. Expand a cell to see its people.
+    </p>
   </section>
 
-  <section class="cell-grid">
-    @for (cell of cells(); track cell.id) {
-      <article class="cell-card">
-        <div class="cell-card__top">
-          <div class="cell-card__mark"><mat-icon>hub</mat-icon></div>
-          <div class="cell-card__menu">
-            @if (auth.isAdmin()) {
-              <button mat-icon-button type="button" (click)="deleteCell(cell)" aria-label="Deactivate cell">
-                <mat-icon>delete_outline</mat-icon>
-              </button>
+  <section class="cell-table-card">
+    <div class="cell-table-wrap">
+      <table class="cell-table">
+        <thead>
+          <tr>
+            <th>Cell</th>
+            <th>Cell leader</th>
+            <th class="count-col">Members</th>
+            <th class="actions-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (cell of cells(); track cell.id) {
+            <tr
+              class="cell-row"
+              [class.cell-row--open]="expandedCellId() === cell.id"
+              tabindex="0"
+              role="button"
+              [attr.aria-expanded]="expandedCellId() === cell.id"
+              (click)="toggleCell(cell)"
+              (keydown.enter)="toggleCell(cell)"
+              (keydown.space)="toggleCell(cell); $event.preventDefault()"
+            >
+              <td>
+                <div class="cell-name">
+                  <span class="chevron">
+                    <mat-icon>{{ expandedCellId() === cell.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                  </span>
+                  <span class="cell-mark"><mat-icon>hub</mat-icon></span>
+                  <div>
+                    <strong>{{ cell.name }}</strong>
+                    <small>{{ cell.description || 'A small group gathering for fellowship and care.' }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="leader-cell">
+                  <span class="leader-avatar">{{ cell.leaderName.charAt(0) }}</span>
+                  <div>
+                    <small>Cell leader</small>
+                    <strong>{{ cell.leaderName }}</strong>
+                  </div>
+                </div>
+              </td>
+              <td class="count-col">
+                <span class="member-count"><mat-icon>group</mat-icon>{{ cell.memberCount }}</span>
+              </td>
+              <td class="actions-col" (click)="$event.stopPropagation()">
+                <button mat-button type="button" (click)="toggleCell(cell)">
+                  {{ expandedCellId() === cell.id ? 'Close' : 'Open' }}
+                  <mat-icon>{{ expandedCellId() === cell.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                </button>
+                <a
+                  mat-icon-button
+                  color="primary"
+                  [routerLink]="['/cells', cell.id]"
+                  matTooltip="Manage cell"
+                  aria-label="Manage cell"
+                >
+                  <mat-icon>arrow_forward</mat-icon>
+                </a>
+                @if (auth.isAdmin()) {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    class="danger"
+                    matTooltip="Deactivate cell"
+                    aria-label="Deactivate cell"
+                    (click)="deleteCell(cell)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                }
+              </td>
+            </tr>
+
+            @if (expandedCellId() === cell.id) {
+              <tr class="cell-detail-row">
+                <td colspan="4">
+                  @if (detailLoadingId() === cell.id) {
+                    <div class="detail-loading">
+                      <mat-spinner diameter="24" />
+                      <span>Loading members…</span>
+                    </div>
+                  } @else if (detailFor(cell.id); as detail) {
+                    <div class="accordion-panel">
+                      <header class="accordion-panel__head">
+                        <div>
+                          <p>Members under this leader</p>
+                          <h3>{{ detail.members.length }} {{ detail.members.length === 1 ? 'person' : 'people' }}</h3>
+                        </div>
+                        <a mat-button [routerLink]="['/cells', cell.id]" (click)="$event.stopPropagation()">
+                          Manage cell
+                          <mat-icon>arrow_forward</mat-icon>
+                        </a>
+                      </header>
+
+                      @if (detail.members.length > 0) {
+                        <div class="accordion-members">
+                          @for (member of detail.members; track member.id) {
+                            <article class="accordion-member">
+                              <span class="member-avatar">{{ memberInitials(member) }}</span>
+                              <div class="member-copy">
+                                <strong>{{ member.fullName }}</strong>
+                                <small>{{ member.email }}</small>
+                              </div>
+                              <span class="member-phone">{{ member.phoneNo || '—' }}</span>
+                              <div class="member-roles">
+                                @for (role of member.roles; track role) {
+                                  <span [class]="roleClass(role)">{{ role }}</span>
+                                }
+                                @if (member.isLeader) {
+                                  <span class="leader-badge"><mat-icon>verified</mat-icon>Leader</span>
+                                }
+                              </div>
+                            </article>
+                          }
+                        </div>
+                      } @else {
+                        <div class="accordion-empty">
+                          <mat-icon>group_add</mat-icon>
+                          <span>No members are assigned to this cell yet.</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </td>
+              </tr>
             }
-          </div>
-        </div>
-
-        <h2>{{ cell.name }}</h2>
-        <p class="cell-card__description">{{ cell.description || 'A small group gathering for fellowship and care.' }}</p>
-
-        <div class="cell-card__leader">
-          <span class="leader-avatar">{{ cell.leaderName.charAt(0) }}</span>
-          <div>
-            <small>Cell leader</small>
-            <strong>{{ cell.leaderName }}</strong>
-          </div>
-        </div>
-
-        <div class="cell-card__foot">
-          <span class="member-count"><mat-icon>group</mat-icon>{{ cell.memberCount }} members</span>
-          <a mat-button [routerLink]="['/cells', cell.id]">Open <mat-icon>arrow_forward</mat-icon></a>
-        </div>
-      </article>
-    }
+          }
+        </tbody>
+      </table>
+    </div>
   </section>
 } @else if (!loading()) {
   <section class="table-card">

@@ -24,7 +24,7 @@ public class CellServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_AddsLeaderToTheirCellWhenUnassigned()
+    public async Task CreateAsync_LeavesLeaderCellMembershipIndependent()
     {
         await using var db = TestDb.Create();
         var leader = TestDb.Member("leader@example.com", "Liza", "Leader");
@@ -36,8 +36,8 @@ public class CellServiceTests
         var created = await service.CreateAsync(new CreateCellRequest("North Cell", "North district", leader.Id));
 
         Assert.Equal(leader.Id, created.LeaderMemberId);
-        Assert.Single(created.Members);
-        Assert.True(created.Members[0].IsLeader);
+        Assert.Empty(created.Members);
+        Assert.Null((await db.Members.FindAsync(leader.Id))!.CellId);
     }
 
     [Fact]

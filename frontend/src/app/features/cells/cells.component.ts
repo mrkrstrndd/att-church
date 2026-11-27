@@ -4,14 +4,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PageHeaderComponent } from '../../shared/page-header.component';
 import { EmptyStateComponent } from '../../shared/empty-state.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/confirm-dialog.component';
 import { CellFormDialogComponent, CellDialogData } from './cell-form-dialog.component';
 import { CellService } from '../../core/services/cell.service';
 import { AuthService } from '../../core/services/auth.service';
-import { CellListItem } from '../../core/models/cell.model';
+import { CellDetail, CellListItem, CellMember } from '../../core/models/cell.model';
 import { apiErrorMessage } from '../../core/utils';
 
 @Component({
@@ -23,7 +25,9 @@ import { apiErrorMessage } from '../../core/utils';
     MatDialogModule,
     MatIconModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatTooltipModule,
     PageHeaderComponent,
     EmptyStateComponent
   ],
@@ -38,6 +42,9 @@ export class CellsComponent implements OnInit {
 
   readonly cells = signal<CellListItem[]>([]);
   readonly loading = signal(true);
+  readonly expandedCellId = signal<string | null>(null);
+  readonly details = signal<Record<string, CellDetail>>({});
+  readonly detailLoadingId = signal<string | null>(null);
   readonly totalMembers = computed(() => this.cells().reduce((sum, cell) => sum + cell.memberCount, 0));
 
   ngOnInit(): void {
@@ -58,6 +65,49 @@ export class CellsComponent implements OnInit {
         });
       }
     });
+  }
+
+  toggleCell(cell: CellListItem): void {
+    if (this.expandedCellId() === cell.id) {
+      this.expandedCellId.set(null);
+      return;
+    }
+
+    this.expandedCellId.set(cell.id);
+    if (this.details()[cell.id]) {
+      return;
+    }
+
+    this.detailLoadingId.set(cell.id);
+    this.cellsApi.get(cell.id).subscribe({
+      next: (detail) => {
+        this.details.update((current) => ({ ...current, [cell.id]: detail }));
+        this.detailLoadingId.set(null);
+      },
+      error: (error: unknown) => {
+        this.detailLoadingId.set(null);
+        this.snackBar.open(apiErrorMessage(error, 'Could not load the members for this cell.'), 'Close', {
+          duration: 5000
+        });
+      }
+    });
+  }
+
+  detailFor(cellId: string): CellDetail | null {
+    return this.details()[cellId] ?? null;
+  }
+
+  memberInitials(member: CellMember): string {
+    return member.fullName
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join('')
+      .toUpperCase();
+  }
+
+  roleClass(role: string): string {
+    return `role-chip role-chip--${role.toLowerCase()}`;
   }
 
   createCell(): void {
@@ -91,6 +141,9 @@ export class CellsComponent implements OnInit {
         this.cellsApi.delete(cell.id).subscribe({
           next: () => {
             this.snackBar.open(`${cell.name} was deactivated.`, 'Close', { duration: 3500 });
+            if (this.expandedCellId() === cell.id) {
+              this.expandedCellId.set(null);
+            }
             this.load();
           },
           error: (error: unknown) =>
